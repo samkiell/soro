@@ -23,22 +23,19 @@ Use CSS custom properties in HSL-compatible values if that matches the installed
 
 | Token | Hex | Use |
 |---|---|---|
-| Brand / primary | `#0B1F3A` | Midnight blue for primary actions, active navigation, links |
-| Brand hover | `#08172B` | Hover and pressed primary actions |
-| Brand tint | `#FBF5E5` | Selected surfaces, subtle brand panels |
-| Gold accent | `#D4AF37` | Accent highlights, selected states, and restrained emphasis |
-| Gold hover | `#B88D1E` | Hover and pressed gold accents |
-| Gold tint | `#FBF5E5` | Subtle highlighted surfaces |
-| Accent surface | `#FFFDF7` | Warm secondary backgrounds |
-| Page background | `#F8FAFC` | App canvas |
-| Surface | `#FFFFFF` | Cards, forms, dialogs |
-| Surface muted | `#F1F5F9` | Subtle panels and disabled surface backgrounds |
-| Border | `#E2E8F0` | Dividers, input borders, card outlines |
-| Border strong | `#CBD5E1` | Higher-emphasis outlines |
-| Text primary | `#0B1F3A` | Headings and primary content |
-| Text secondary | `#475569` | Body supporting text |
-| Text muted | `#64748B` | Hints and metadata; do not use for essential low-contrast text |
-| White | `#FFFFFF` | Text on dark/brand surfaces where contrast is sufficient |
+| OAU Purple / primary | `#2E1A72` | OAU Purple for primary actions, header highlights, brand identity |
+| OAU Purple hover | `#24145C` | Hover and pressed primary actions |
+| OAU Gold | `#D4AF37` | OAU Gold for secondary buttons, badges, highlights, accents |
+| OAU Gold hover | `#C59F2D` | Hover and pressed gold actions |
+| Warm Cream | `#FAF6E9` | Warm cream hero background, card surfaces |
+| Light Gold | `#F7F5E9` | Light gold subtle background tint |
+| Light Gray | `#F1F3F5` | Muted background, neutral card borders |
+| White | `#FFFFFF` | Card surfaces, dialogs, contrasting text |
+| Ink | `#111827` | Headings, primary text, high-contrast labels |
+| Text secondary | `#4B5563` | Body supporting text |
+| Text muted | `#6B7280` | Hints and secondary metadata |
+| Border | `#E5E7EB` | Dividers, input borders, card outlines |
+| Border strong | `#D1D5DB` | Higher-emphasis outlines |
 
 ### Semantic colors
 

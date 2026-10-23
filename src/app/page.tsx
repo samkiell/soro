@@ -1,0 +1,371 @@
+import Link from "next/link";
+import {
+  Shield,
+  PhoneCall,
+  Lock,
+  Bell,
+  ArrowRight,
+  EyeOff,
+  Clock,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function HomePage() {
+  return (
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-warm-cream py-12 sm:py-16 lg:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+            {/* Left Content Column */}
+            <div className="flex flex-col items-start lg:col-span-7">
+              {/* Trust Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-white/80 px-3.5 py-1 text-xs font-semibold text-ink shadow-2xs">
+                <Shield className="h-3.5 w-3.5 text-gold fill-gold/30" />
+                <span>Your safety. Our priority.</span>
+              </div>
+
+              {/* Main Headline */}
+              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-brand sm:text-5xl lg:text-6xl">
+                Report it.
+                <span className="block text-gold">We&apos;ll handle it.</span>
+              </h1>
+
+              {/* Subtext */}
+              <p className="mt-5 max-w-xl text-base text-text-secondary sm:text-lg leading-relaxed">
+                Soro makes it easy to report incidents on campus and get the help you need — fast.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex w-full flex-col gap-3.5 sm:w-auto sm:flex-row sm:items-center">
+                <Link href="/report/new" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full bg-brand text-white hover:bg-brand-hover shadow-sm sm:w-auto"
+                  >
+                    Report an Incident
+                  </Button>
+                </Link>
+                <Link href="/emergency" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full border-border bg-white text-ink hover:bg-surface-muted shadow-xs sm:w-auto"
+                  >
+                    View Emergency Contacts
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Privacy Indicator */}
+              <div className="mt-6 flex items-center gap-2 text-xs text-text-secondary">
+                <Lock className="h-3.5 w-3.5 text-gold" />
+                <span>End-to-end privacy. Anonymous reporting option supported.</span>
+              </div>
+            </div>
+
+            {/* Right Visual Column: OAU Senate Building & Landmark Illustration */}
+            <div className="flex justify-center lg:col-span-5">
+              <div className="relative w-full max-w-md">
+                {/* Decorative background aura */}
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-gold/15 to-brand/10 blur-xl"></div>
+
+                <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-white/70 p-4 shadow-sm backdrop-blur-xs">
+                  {/* High fidelity SVG of OAU Iconic Senate Building & Statue Landmark */}
+                  <svg
+                    viewBox="0 0 400 340"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-auto w-full drop-shadow-xs"
+                    aria-label="Obafemi Awolowo University Campus Landmark"
+                  >
+                    {/* Sky & Sun backdrop */}
+                    <rect width="400" height="340" rx="12" fill="#FAF6E9" />
+                    <circle cx="200" cy="110" r="85" fill="#F7EAC4" fillOpacity="0.45" />
+
+                    {/* Distant Campus Silhouettes */}
+                    <path
+                      d="M20 250 L60 235 L80 235 L100 250 L140 240 L170 240 L190 250 L250 250 L280 238 L320 238 L350 250 L380 250 L380 280 L20 280 Z"
+                      fill="#EADBB2"
+                      fillOpacity="0.6"
+                    />
+
+                    {/* Campus Trees Backdrop */}
+                    <circle cx="90" cy="235" r="18" fill="#D9C99A" />
+                    <circle cx="110" cy="240" r="14" fill="#CBB882" />
+                    <circle cx="295" cy="238" r="16" fill="#D9C99A" />
+                    <circle cx="315" cy="233" r="20" fill="#CBB882" />
+
+                    {/* OAU Tower / Senate Monument Center */}
+                    {/* Left Arch Column */}
+                    <path
+                      d="M150 260 L160 110 L172 105 L178 260 Z"
+                      fill="#D4AF37"
+                    />
+                    <path
+                      d="M160 110 L166 90 L172 90 L172 105 Z"
+                      fill="#B88D1E"
+                    />
+                    {/* Right Arch Column */}
+                    <path
+                      d="M222 260 L228 105 L240 110 L250 260 Z"
+                      fill="#D4AF37"
+                    />
+                    <path
+                      d="M228 105 L228 90 L234 90 L240 110 Z"
+                      fill="#B88D1E"
+                    />
+
+                    {/* Center Monument Arch Bridge & Spire */}
+                    <path
+                      d="M166 90 L200 65 L234 90 L226 102 L200 84 L174 102 Z"
+                      fill="#E2C256"
+                    />
+                    <rect x="197" y="52" width="6" height="16" fill="#B88D1E" rx="1" />
+                    <circle cx="200" cy="50" r="3" fill="#D4AF37" />
+
+                    {/* Inner Arch Glow & Structure */}
+                    <path
+                      d="M174 260 L176 125 Q200 115 224 125 L226 260 Z"
+                      fill="#FAF3DC"
+                    />
+
+                    {/* OAU Crest Medallion in Arch */}
+                    <circle cx="200" cy="165" r="18" fill="#2E1A72" stroke="#D4AF37" strokeWidth="2.5" />
+                    <path
+                      d="M195 158 H205 M200 154 V176 M194 163 C197 172 203 172 206 163"
+                      stroke="#D4AF37"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="200" cy="165" r="7" fill="none" stroke="#D4AF37" strokeWidth="1" strokeDasharray="2 2" />
+
+                    {/* Monument Base Plaza Steps */}
+                    <path d="M130 260 H270 L280 275 H120 Z" fill="#C59F2D" />
+                    <path d="M110 275 H290 L300 288 H100 Z" fill="#B08B20" />
+                    <path d="M70 288 H330 L345 302 H55 Z" fill="#9C7716" />
+
+                    {/* Campus Forecourt & Walkway Lawn */}
+                    <rect x="0" y="302" width="400" height="38" fill="#F4E9C9" />
+                    <path d="M170 302 L150 340 H250 L230 302 Z" fill="#E8D7AA" />
+
+                    {/* Clean Sub-Text Badge on Illustration */}
+                    <rect x="110" y="308" width="180" height="22" rx="11" fill="#FFFFFF" fillOpacity="0.9" />
+                    <text
+                      x="200"
+                      y="323"
+                      textAnchor="middle"
+                      fill="#2E1A72"
+                      fontSize="10"
+                      fontWeight="bold"
+                      fontFamily="Inter, sans-serif"
+                    >
+                      GREAT IFE · OAU CAMPUS
+                    </text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4-Column Feature Strip (Direct Reproduction from Reference Image 1) */}
+      <section className="bg-brand py-6 text-white shadow-inner">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* 1. Easy Reporting */}
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/10 text-gold shadow-xs">
+                <Shield className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Easy Reporting</h3>
+                <p className="text-xs text-purple-200">Submit incidents in a few simple steps</p>
+              </div>
+            </div>
+
+            {/* 2. Anonymous Option */}
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/10 text-gold shadow-xs">
+                <Lock className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Anonymous Option</h3>
+                <p className="text-xs text-purple-200">Report anonymously with complete privacy</p>
+              </div>
+            </div>
+
+            {/* 3. Track Status */}
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/10 text-gold shadow-xs">
+                <Bell className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Track Status</h3>
+                <p className="text-xs text-purple-200">Get real-time updates on your report</p>
+              </div>
+            </div>
+
+            {/* 4. One-Tap Help */}
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/10 text-gold shadow-xs">
+                <PhoneCall className="h-6 w-6 text-gold" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">One-Tap Help</h3>
+                <p className="text-xs text-purple-200">Quick access to emergency contacts</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Soro Section */}
+      <section id="about" className="bg-white py-16 sm:py-20 border-b border-border">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-gold">About Soro</span>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-brand sm:text-4xl">
+              Campus Safety Built for Students & Responders
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-text-secondary sm:text-lg">
+              Soro bridge students and campus security at Obafemi Awolowo University. Designed for speed, accountability, and student confidentiality.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Card className="border-border bg-warm-cream/30 hover:border-gold/50 transition-colors">
+              <CardHeader>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-gold">
+                  <Shield className="h-5 w-5 text-gold" />
+                </div>
+                <CardTitle className="mt-3 text-lg font-bold text-brand">Secure & Accountable</CardTitle>
+                <CardDescription className="text-sm text-text-secondary">
+                  Every submitted report is logged with an immutable audit trail, ensuring security officers and administrators investigate transparently.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-border bg-warm-cream/30 hover:border-gold/50 transition-colors">
+              <CardHeader>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-gold">
+                  <EyeOff className="h-5 w-5 text-gold" />
+                </div>
+                <CardTitle className="mt-3 text-lg font-bold text-brand">Confidential Reporting</CardTitle>
+                <CardDescription className="text-sm text-text-secondary">
+                  Students may report sensitive concerns anonymously. Your personal information will never be shared without consent.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-border bg-warm-cream/30 hover:border-gold/50 transition-colors">
+              <CardHeader>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-gold">
+                  <Clock className="h-5 w-5 text-gold" />
+                </div>
+                <CardTitle className="mt-3 text-lg font-bold text-brand">Transparent Progress</CardTitle>
+                <CardDescription className="text-sm text-text-secondary">
+                  Monitor the investigation lifecycle from &quot;Received&quot; to &quot;In Progress&quot; and &quot;Resolved&quot; in real-time.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How Soro Works Section */}
+      <section id="how-it-works" className="bg-warm-cream/40 py-16 sm:py-20 border-b border-border">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-gold">Simple 3-Step Process</span>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-brand sm:text-4xl">
+              How Soro Works
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-text-secondary sm:text-base">
+              Submit your concern in seconds, let the security team review, and follow updates until resolution.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center text-center rounded-xl border border-amber-200/70 bg-white p-6 shadow-2xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-gold font-extrabold text-lg shadow-xs">
+                1
+              </div>
+              <h3 className="mt-4 font-bold text-brand text-base">Submit Your Report</h3>
+              <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                Describe the incident, choose campus location, specify urgency, and attach optional photo evidence.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center text-center rounded-xl border border-amber-200/70 bg-white p-6 shadow-2xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-gold font-extrabold text-lg shadow-xs">
+                2
+              </div>
+              <h3 className="mt-4 font-bold text-brand text-base">Security Review</h3>
+              <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                Authorized campus security personnel evaluate the report and initiate necessary response actions.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex flex-col items-center text-center rounded-xl border border-amber-200/70 bg-white p-6 shadow-2xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-gold font-extrabold text-lg shadow-xs">
+                3
+              </div>
+              <h3 className="mt-4 font-bold text-brand text-base">Follow Progress</h3>
+              <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                Receive timeline updates directly on your dashboard as official notes and resolution progress are posted.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <Link href="/report/new">
+              <Button size="lg" className="bg-brand text-white hover:bg-brand-hover font-semibold px-8 shadow-sm">
+                Get Started Now <ArrowRight className="ml-2 h-4 w-4 text-gold" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Urgent Emergency Callout Section */}
+      <section className="bg-white py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col items-center justify-between gap-6 rounded-xl border-2 border-danger/40 bg-red-50/70 p-6 sm:flex-row sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-danger text-white shadow-xs">
+                <PhoneCall className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-danger">Experiencing an active campus emergency?</h3>
+                <p className="mt-1 text-sm text-text-secondary max-w-xl">
+                  Do not wait for a ticket review. Submitting an online report does not automatically dispatch immediate rescue teams. Call campus responders directly.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-2 sm:w-auto">
+              <a
+                href="tel:08162214241"
+                className="flex items-center justify-center gap-2 rounded-md bg-danger px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-800"
+              >
+                <PhoneCall className="h-4 w-4" /> Call 08162214241
+              </a>
+              <Link
+                href="/emergency"
+                className="text-center text-xs font-semibold text-brand underline hover:text-brand-hover"
+              >
+                View full emergency directory
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
