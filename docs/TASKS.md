@@ -114,15 +114,74 @@
 - Clearly distinguish implemented features from proposed/future work.
 **Acceptance:** Documentation matches the actual app and does not overstate emergency capabilities.
 
-## Suggested ownership from the team poll
+## Team ownership and page-based integration
 
-- **Frontend/scaffolding:** Haschwal th, Muheez CSE, ZariyaTech.
-- **Backend:** samkiell and day_veedd.
-- **Presentation/research/docs:** Sherry Chen, bee_jay, Oluwanifemi.
-- **Testing:** Fiyinfoluwa, Jeffrey, Anonymous, Bhago, debby, Nathan.
-- **Bug fixing:** assign one or two testers after the team confirms exact GitHub usernames.
+Use separate frontend and backend ownership so both sides can work in parallel against agreed data/API contracts. Each page group has a named integration partner. The usernames below are GitHub handles; use these for team coordination.
 
-Names above came from the task poll and may not exactly match GitHub handles. Confirm handle mappings before assigning issues. The repository collaborator list supplied for this project is the source of valid handles; do not guess a handle based on a display name.
+### Foundation and shared setup
+
+- **Foundation/scaffolding + landing page:** `samkiell`
+- **Integration partner:** `dayveedd`
+- **Scope:** scaffold Next.js App Router + TypeScript + pnpm; configure Tailwind/shadcn; establish shared layout, navigation, design tokens, conventions, environment variable names, and landing page. `samkiell` will also contribute across frontend and backend and help unblock integrations.
+
+### Page group assignments
+
+| Issue | Page / workstream | Frontend owner(s) | Backend owner(s) | Integration partner(s) |
+|---|---|---|---|---|
+| [#1](https://github.com/samkiell/soro/issues/1) | Foundation, shared shell, landing page | `samkiell` | `samkiell` (cross-stack) | `dayveedd` |
+| [#2](https://github.com/samkiell/soro/issues/2) | Prisma schema and Neon | — | `dayveedd` | `samkiell` |
+| [#3](https://github.com/samkiell/soro/issues/3) | Login, registration, authentication and authorization | `muheez-oyedeji` (UI coordination) | `dayveedd`, `samkiell` | `muheez-oyedeji` |
+| [#4](https://github.com/samkiell/soro/issues/4) | Incident report form | `zakariyaurodiyat74-art` | `samkiell` | `dayveedd` |
+| [#5](https://github.com/samkiell/soro/issues/5) | Student dashboard and report list | `muheez-oyedeji` | `dayveedd` | `samkiell` |
+| [#6](https://github.com/samkiell/soro/issues/6) | Report details and status history | `muheez-oyedeji` | `dayveedd` | `samkiell` |
+| [#7](https://github.com/samkiell/soro/issues/7) | Emergency information page | `samkiell` | — | `muheez-oyedeji` |
+| [#8](https://github.com/samkiell/soro/issues/8) | Admin overview and report management | `zakariyaurodiyat74-art` | `samkiell` | `dayveedd` |
+| [#9](https://github.com/samkiell/soro/issues/9) | Optional secure photo uploads | `zakariyaurodiyat74-art` (form integration) | `samkiell` | `dayveedd` |
+| [#10](https://github.com/samkiell/soro/issues/10) | QA and regression testing | Cross-page verification | Feature owners support fixes | `samkiell` |
+| [#11](https://github.com/samkiell/soro/issues/11) | Research, documentation and presentation | — | — | `samkiell` |
+
+### QA contributors
+
+- `fiyindev`
+- `jeffreyonaji-max`
+- `Bhago-tech`
+- `deborah-ui-creator`
+- `CyberNath01`
+- `Taiwo2252`
+
+QA should start as soon as usable flows exist. Testers should record reproducible steps, expected vs actual results, severity, and screenshots where useful. Feature owners remain responsible for fixing their areas.
+
+### Research, documentation and presentation contributors
+
+- `sherrychen23tt-maker`
+- `b33jay-ctr`
+- `Oluwafemi-Moyinoluwa`
+- `maryam-86`
+
+Coordinate with feature owners to ensure documentation, research summaries, screenshots, and presentation claims match the implemented system. Do not invent research results or use sensitive incident data in screenshots.
+
+### Additional contributors to coordinate
+
+These known repository handles are available for pairing, review, additional page work, or QA as capacity requires. Confirm their preferred task before assigning a specific deliverable:
+
+- `RosaMary397`
+- `olaoluwanoah5-ops`
+- `nifemidevs`
+- `oluwadarasimi-dev`
+- `Ezekiel2904`
+- `Fatihmode`
+
+The poll mentioned Haschwal th, but no GitHub username was supplied, so no handle is assumed. `zakariyaurodiyat74-art` is the GitHub username for ZariyaTech.
+
+### Integration rules
+
+- Frontend and backend owners must agree on request/response types, validation errors, route names, status values, and loading/error states before integrating.
+- Backend authorization must be enforced server-side. UI hiding is not authorization.
+- Agree on Prisma model and field names before building dependent features.
+- Use focused branches and pull requests against `main`; avoid unreviewed direct pushes for feature work.
+- Include screenshots for UI changes, verification steps, and issue references in pull requests.
+- Do not commit secrets or real user data.
+- Actual GitHub assignee fields may remain unset until contributors accept repository invitations. The issue bodies record suggested ownership in the meantime.
 
 ## Suggested issue order
 
