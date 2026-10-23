@@ -9,7 +9,7 @@
 - Work in focused branches and open pull requests against `main`; avoid unreviewed direct pushes for feature work.
 - Keep PRs small, include screenshots for UI changes, tests or manual verification steps, and reference the relevant issue.
 - Do not commit secrets or real user data.
-- Agree on shared types, Prisma model names, route contracts, and environment variable names before parallel work creates conflicting assumptions.
+- Follow the locked field names, enum values, server action signature, and upload contract in [REPORT_API_CONTRACT.md](./REPORT_API_CONTRACT.md); do not invent competing contracts.
 - Backend authorization must be enforced server-side.
 - Do not claim that Soro sends emergency alerts unless a real delivery integration is implemented and tested.
 
