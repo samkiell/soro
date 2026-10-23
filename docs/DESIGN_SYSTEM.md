@@ -2,14 +2,14 @@
 
 **Status:** Proposed baseline for implementation  
 **Product:** Soro Campus Safety & Incident Reporting System  
-**Visual direction:** OAU-inspired deep green and white; calm, clear, trustworthy, accessible, mobile-first
+**Visual direction:** OAU-inspired midnight blue and gold; calm, clear, trustworthy, accessible, mobile-first
 
 This document locks the first-release design tokens and shared interface rules. Use it alongside [ARCHITECTURE.md](./ARCHITECTURE.md). The PRD defines product requirements; this file defines visual and interaction consistency.
 
 ## 1. Design principles
 
 1. **Clarity before decoration.** Keep the next action obvious, especially when a student is stressed.
-2. **School identity first.** Use OAU-inspired deep green and white as the primary brand palette, supported by neutral surfaces and dark ink. Reserve amber and red for urgency and destructive actions.
+2. **School identity first.** Use OAU-inspired midnight blue and gold as the primary brand palette, supported by neutral surfaces and dark ink. Reserve amber and red for urgency and destructive actions.
 3. **Mobile-first.** Core flows must work on small screens and weak connections.
 4. **Accessible by default.** Use visible focus, clear labels, keyboard support, readable type, and more than color alone to communicate status.
 5. **Honest feedback.** Never imply that a report was sent, a call was placed, or an emergency team was alerted unless that action actually happened.
@@ -23,17 +23,19 @@ Use CSS custom properties in HSL-compatible values if that matches the installed
 
 | Token | Hex | Use |
 |---|---|---|
-| Brand / primary | `#006B3F` | OAU-inspired deep green for primary actions, active navigation, links |
-| Brand hover | `#005531` | Hover and pressed primary actions |
-| Brand tint | `#EAF5EF` | Selected surfaces, subtle brand panels |
-| Accent / dark ink | `#17231C` | High-contrast supporting emphasis and dark navigation surfaces where needed |
-| Accent tint | `#F2F7F3` | Calm secondary backgrounds |
+| Brand / primary | `#0B1F3A` | Midnight blue for primary actions, active navigation, links |
+| Brand hover | `#08172B` | Hover and pressed primary actions |
+| Brand tint | `#FBF5E5` | Selected surfaces, subtle brand panels |
+| Gold accent | `#D4AF37` | Accent highlights, selected states, and restrained emphasis |
+| Gold hover | `#B88D1E` | Hover and pressed gold accents |
+| Gold tint | `#FBF5E5` | Subtle highlighted surfaces |
+| Accent surface | `#FFFDF7` | Warm secondary backgrounds |
 | Page background | `#F8FAFC` | App canvas |
 | Surface | `#FFFFFF` | Cards, forms, dialogs |
 | Surface muted | `#F1F5F9` | Subtle panels and disabled surface backgrounds |
 | Border | `#E2E8F0` | Dividers, input borders, card outlines |
 | Border strong | `#CBD5E1` | Higher-emphasis outlines |
-| Text primary | `#142019` | Headings and primary content |
+| Text primary | `#0B1F3A` | Headings and primary content |
 | Text secondary | `#475569` | Body supporting text |
 | Text muted | `#64748B` | Hints and metadata; do not use for essential low-contrast text |
 | White | `#FFFFFF` | Text on dark/brand surfaces where contrast is sufficient |
@@ -48,21 +50,21 @@ Use CSS custom properties in HSL-compatible values if that matches the installed
 | Warning tint | `#FFFBEB` | Warning backgrounds |
 | Danger | `#B91C1C` | Critical urgency, destructive action, failure |
 | Danger tint | `#FEF2F2` | Error and critical alert backgrounds |
-| Info | `#006B3F` | Neutral information and guidance using the brand color |
-| Info tint | `#EAF5EF` | Informational backgrounds |
+| Info | `#0B1F3A` | Neutral information and guidance using the brand color |
+| Info tint | `#EFF6FF` | Informational backgrounds |
 
 Semantic color indicates meaning, not decoration. Pair status colors with text labels or icons. Do not rely on color alone.
 
 ### Incident urgency mapping
 
 - **Low:** neutral slate badge, label “Low”.
-- **Medium:** deep green or slate badge, label “Medium”.
+- **Medium:** slate badge, label “Medium”.
 - **High:** amber badge, label “High”.
 - **Critical:** red badge, label “Critical”.
 
 ### Report status mapping
 
-- **Received:** deep green or slate badge, label “Received”.
+- **Received:** midnight blue badge, label “Received”.
 - **In progress:** amber badge, label “In progress”.
 - **Resolved:** green badge, label “Resolved”.
 
@@ -70,7 +72,7 @@ Keep status colors distinct from buttons and do not use a red page-wide treatmen
 
 ### Palette note
 
-The palette is an OAU-inspired implementation choice using deep green and white as the school identity, with dark ink for contrast. Treat these as project design tokens rather than claiming they are official, exact institutional brand hex values. Keep semantic warning (`#B45309`) and danger (`#B91C1C`) colors distinct so urgent states remain recognizable.
+The palette is an proposed OAU-inspired implementation palette using midnight blue and gold as the school identity, with dark ink for contrast. Treat these as project design tokens rather than claiming they are official, exact institutional brand hex values. Keep semantic warning (`#B45309`) and danger (`#B91C1C`) colors distinct so urgent states remain recognizable.
 
 ## 3. Typography
 
@@ -139,7 +141,7 @@ Use Tailwind's default 4px-based spacing scale. Do not add arbitrary one-off spa
 ### Buttons
 
 - Minimum interactive height: `44px` on touch-oriented interfaces.
-- Primary: OAU-inspired deep green background (`#006B3F`) with accessible white text.
+- Primary: midnight blue background (`#0B1F3A`) with accessible white text.
 - Secondary: white or muted background with border.
 - Destructive: danger color for destructive actions only.
 - Ghost: transparent until hover/focus; use for low-emphasis actions.
