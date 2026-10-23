@@ -120,43 +120,43 @@ Use separate frontend and backend ownership so both sides can work in parallel a
 
 ### Foundation and shared setup
 
-- **Foundation/scaffolding + landing page:** `samkiell`
-- **Integration partner:** `dayveedd`
-- **Scope:** scaffold Next.js App Router + TypeScript + pnpm; configure Tailwind/shadcn; establish shared layout, navigation, design tokens, conventions, environment variable names, and landing page. `samkiell` will also contribute across frontend and backend and help unblock integrations.
+- **Foundation/scaffolding + landing page:** [samkiell](https://github.com/samkiell)
+- **Integration partner:** [dayveedd](https://github.com/dayveedd)
+- **Scope:** scaffold Next.js App Router + TypeScript + pnpm; configure Tailwind/shadcn; establish shared layout, navigation, design tokens, conventions, environment variable names, and landing page. [samkiell](https://github.com/samkiell) will also contribute across frontend and backend and help unblock integrations.
 
 ### Page group assignments
 
 | Issue | Page / workstream | Frontend owner(s) | Backend owner(s) | Integration partner(s) |
 |---|---|---|---|---|
-| [#1](https://github.com/samkiell/soro/issues/1) | Foundation, shared shell, landing page | `samkiell` | `samkiell` (cross-stack) | `dayveedd` |
-| [#2](https://github.com/samkiell/soro/issues/2) | Prisma schema and Neon | — | `dayveedd` | `samkiell` |
-| [#3](https://github.com/samkiell/soro/issues/3) | Login, registration, authentication and authorization | `muheez-oyedeji` (UI coordination) | `dayveedd`, `samkiell` | `muheez-oyedeji` |
-| [#4](https://github.com/samkiell/soro/issues/4) | Incident report form | `zakariyaurodiyat74-art` | `samkiell` | `dayveedd` |
-| [#5](https://github.com/samkiell/soro/issues/5) | Student dashboard and report list | `muheez-oyedeji` | `dayveedd` | `samkiell` |
-| [#6](https://github.com/samkiell/soro/issues/6) | Report details and status history | `muheez-oyedeji` | `dayveedd` | `samkiell` |
-| [#7](https://github.com/samkiell/soro/issues/7) | Emergency information page | `samkiell` | — | `muheez-oyedeji` |
-| [#8](https://github.com/samkiell/soro/issues/8) | Admin overview and report management | `zakariyaurodiyat74-art` | `samkiell` | `dayveedd` |
-| [#9](https://github.com/samkiell/soro/issues/9) | Optional secure photo uploads | `zakariyaurodiyat74-art` (form integration) | `samkiell` | `dayveedd` |
-| [#10](https://github.com/samkiell/soro/issues/10) | QA and regression testing | Cross-page verification | Feature owners support fixes | `samkiell` |
-| [#11](https://github.com/samkiell/soro/issues/11) | Research, documentation and presentation | — | — | `samkiell` |
+| [#1](https://github.com/samkiell/soro/issues/1) | Foundation, shared shell, landing page | [samkiell](https://github.com/samkiell) | [samkiell](https://github.com/samkiell) (cross-stack) | [dayveedd](https://github.com/dayveedd) |
+| [#2](https://github.com/samkiell/soro/issues/2) | Prisma schema and Neon | — | [dayveedd](https://github.com/dayveedd) | [samkiell](https://github.com/samkiell) |
+| [#3](https://github.com/samkiell/soro/issues/3) | Login, registration, authentication and authorization | [muheez-oyedeji](https://github.com/muheez-oyedeji) (UI coordination) | [dayveedd](https://github.com/dayveedd), [samkiell](https://github.com/samkiell) | [muheez-oyedeji](https://github.com/muheez-oyedeji) |
+| [#4](https://github.com/samkiell/soro/issues/4) | Incident report form | [zakariyaurodiyat74-art](https://github.com/zakariyaurodiyat74-art) | [samkiell](https://github.com/samkiell) | [dayveedd](https://github.com/dayveedd) |
+| [#5](https://github.com/samkiell/soro/issues/5) | Student dashboard and report list | [muheez-oyedeji](https://github.com/muheez-oyedeji) | [dayveedd](https://github.com/dayveedd) | [samkiell](https://github.com/samkiell) |
+| [#6](https://github.com/samkiell/soro/issues/6) | Report details and status history | [muheez-oyedeji](https://github.com/muheez-oyedeji) | [dayveedd](https://github.com/dayveedd) | [samkiell](https://github.com/samkiell) |
+| [#7](https://github.com/samkiell/soro/issues/7) | Emergency information page | [samkiell](https://github.com/samkiell) | — | [muheez-oyedeji](https://github.com/muheez-oyedeji) |
+| [#8](https://github.com/samkiell/soro/issues/8) | Admin overview and report management | [zakariyaurodiyat74-art](https://github.com/zakariyaurodiyat74-art) | [samkiell](https://github.com/samkiell) | [dayveedd](https://github.com/dayveedd) |
+| [#9](https://github.com/samkiell/soro/issues/9) | Optional secure photo uploads | [zakariyaurodiyat74-art](https://github.com/zakariyaurodiyat74-art) (form integration) | [samkiell](https://github.com/samkiell) | [dayveedd](https://github.com/dayveedd) |
+| [#10](https://github.com/samkiell/soro/issues/10) | QA and regression testing | Cross-page verification | Feature owners support fixes | [samkiell](https://github.com/samkiell) |
+| [#11](https://github.com/samkiell/soro/issues/11) | Research, documentation and presentation | — | — | [samkiell](https://github.com/samkiell) |
 
 ### QA contributors
 
-- `fiyindev`
-- `jeffreyonaji-max`
-- `Bhago-tech`
-- `deborah-ui-creator`
-- `CyberNath01`
-- `Taiwo2252`
+- [fiyindev](https://github.com/fiyindev)
+- [jeffreyonaji-max](https://github.com/jeffreyonaji-max)
+- [Bhago-tech](https://github.com/Bhago-tech)
+- [deborah-ui-creator](https://github.com/deborah-ui-creator)
+- [CyberNath01](https://github.com/CyberNath01)
+- [Taiwo2252](https://github.com/Taiwo2252)
 
 QA should start as soon as usable flows exist. Testers should record reproducible steps, expected vs actual results, severity, and screenshots where useful. Feature owners remain responsible for fixing their areas.
 
 ### Research, documentation and presentation contributors
 
-- `sherrychen23tt-maker`
-- `b33jay-ctr`
-- `Oluwafemi-Moyinoluwa`
-- `maryam-86`
+- [sherrychen23tt-maker](https://github.com/sherrychen23tt-maker)
+- [b33jay-ctr](https://github.com/b33jay-ctr)
+- [Oluwafemi-Moyinoluwa](https://github.com/Oluwafemi-Moyinoluwa)
+- [maryam-86](https://github.com/maryam-86)
 
 Coordinate with feature owners to ensure documentation, research summaries, screenshots, and presentation claims match the implemented system. Do not invent research results or use sensitive incident data in screenshots.
 
@@ -164,14 +164,14 @@ Coordinate with feature owners to ensure documentation, research summaries, scre
 
 These known repository handles are available for pairing, review, additional page work, or QA as capacity requires. Confirm their preferred task before assigning a specific deliverable:
 
-- `RosaMary397`
-- `olaoluwanoah5-ops`
-- `nifemidevs`
-- `oluwadarasimi-dev`
-- `Ezekiel2904`
-- `Fatihmode`
+- [RosaMary397](https://github.com/RosaMary397)
+- [olaoluwanoah5-ops](https://github.com/olaoluwanoah5-ops)
+- [nifemidevs](https://github.com/nifemidevs)
+- [oluwadarasimi-dev](https://github.com/oluwadarasimi-dev)
+- [Ezekiel2904](https://github.com/Ezekiel2904)
+- [Fatihmode](https://github.com/Fatihmode)
 
-The poll mentioned Haschwal th, but no GitHub username was supplied, so no handle is assumed. `zakariyaurodiyat74-art` is the GitHub username for ZariyaTech.
+The poll mentioned Haschwal th, but no GitHub username was supplied, so no handle is assumed. [zakariyaurodiyat74-art](https://github.com/zakariyaurodiyat74-art) is the GitHub username for ZariyaTech.
 
 ### Integration rules
 
