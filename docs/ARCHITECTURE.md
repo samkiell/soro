@@ -128,6 +128,8 @@ Client-side validation improves usability but is never a security boundary. A hi
 
 ## 6. Core data model
 
+**Locked integration contract:** Exact Prisma field names, enum values, create-report signature, and photo upload flow are defined in [REPORT_API_CONTRACT.md](./REPORT_API_CONTRACT.md). Frontend and backend work must follow it.
+
 Use Prisma models with explicit relations and timestamps. Final field names and optional profile fields must be agreed in the Prisma schema before migrations are created.
 
 ### User
