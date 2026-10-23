@@ -93,7 +93,8 @@
 ### Task 9 - Optional photo uploads
 **Suggested owner:** Backend team, coordinated with report form owner  
 **Deliverables:**
-- Integrate Cloudinary using server-side secrets.
+- Integrate Neon Object Storage using the private `assets` bucket and server-side credentials.
+- Store object keys in report records and enforce report authorization before serving uploaded images.
 - Validate allowed file types and size.
 - Handle upload failures without losing the rest of the report.
 **Acceptance:** Only permitted files are accepted and secrets are never exposed to the browser.
