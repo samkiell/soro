@@ -52,6 +52,8 @@ Authorization must be enforced on the server for every protected operation, not 
 
 ## 5. Incident report fields
 
+Exact Prisma field names, enum values, create-report signature, and photo upload flow are locked in [REPORT_API_CONTRACT.md](./REPORT_API_CONTRACT.md).
+
 Required:
 - Title
 - Description
