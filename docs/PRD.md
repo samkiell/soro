@@ -99,7 +99,7 @@ Feedback gathered for the project indicates:
 - Neon Postgres
 - Prisma
 - NextAuth.js Credentials
-- Cloudinary for optional photo uploads
+- Neon Object Storage for optional photo uploads, using the private `assets` bucket
 - React Hook Form and Zod
 - pnpm
 - Vercel deployment
@@ -114,7 +114,7 @@ Do not substitute the locked stack without team approval.
 - A user must not be able to view another user's private report by changing an ID.
 - Anonymous reports must not display reporter identity to ordinary users or expose it through public-facing APIs/UI. Define the minimum internal access needed for safety and abuse handling.
 - Keep administrator notes separate from user-visible status history.
-- Restrict photo upload type and size; use secure Cloudinary configuration and do not expose secrets in client code.
+- Restrict photo upload type and size; use server-side Neon Object Storage credentials and keep the private `assets` bucket protected by server-side authorization.
 - Store secrets in environment variables and document required variables without committing values.
 - Avoid collecting unnecessary personal data.
 - Provide clear limitations: this system does not replace calling emergency services.
