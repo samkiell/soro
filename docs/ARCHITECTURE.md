@@ -17,8 +17,8 @@ Why: this is easier for a learner-heavy team to understand, test, deploy, and ma
 - Next.js App Router and TypeScript
 - pnpm
 - Tailwind CSS and shadcn/ui
-- Neon PostgreSQL
-- Prisma ORM
+- **Neon PostgreSQL** as the only application database
+- Prisma ORM for schema, migrations, and database access
 - NextAuth.js Credentials provider, using the version compatible with the project setup
 - Zod for input validation
 - React Hook Form for client-side forms
@@ -174,15 +174,20 @@ Use these application statuses consistently:
 
 Do not make a report appear resolved just because an admin opened it or added a note.
 
-## 8. File upload boundary
+## 8. File upload boundary: Cloudinary
+
+Cloudinary is the approved image storage and delivery provider for optional incident photos. Neon stores application records and Cloudinary asset references; image binaries do not belong in PostgreSQL.
 
 - Uploads are optional and must not block a text-only report.
-- Validate file type and size on the server; do not trust filename extensions or client-provided MIME types alone.
-- Use server-side Cloudinary credentials. Do not expose secret API keys in browser code.
-- Accept only the supported image types and a documented size limit.
-- Store only the asset identifiers and URLs needed by the application.
-- Avoid embedding private incident details in public asset URLs or filenames. Decide whether delivery must be restricted before production use.
+- Validate file type, size, and upload authorization on the server; do not trust filename extensions or client-provided MIME types alone.
+- Use server-side Cloudinary credentials. Never expose `CLOUDINARY_API_SECRET` in browser code or prefix it with `NEXT_PUBLIC_`.
+- Prefer a server-created signed upload flow or a server-side upload endpoint. Generate signatures on the server and enforce allowed formats, size limits, and an appropriate upload folder.
+- Accept only the supported image types and document the maximum size before implementation.
+- Store the Cloudinary `public_id`, secure delivery URL, and only other metadata the application genuinely needs.
+- Avoid embedding names, incident descriptions, or other private details in public asset URLs or filenames.
+- Decide whether assets must be private or access-controlled before production. Do not assume an unlisted URL makes sensitive incident photos private.
 - Handle failed uploads gracefully and allow the user to submit without a photo.
+- Define cleanup behavior for abandoned uploads and deleted reports so unused assets do not accumulate.
 
 ## 9. Route and permission matrix
 
@@ -230,17 +235,28 @@ Before merging a feature:
 
 Never use real incident reports or real credentials in test fixtures.
 
-## 13. Environment variables
+## 13. Environment variables and service setup
 
-Document required variables in `.env.example` using placeholder values only. Expected names should be finalized with the actual installed libraries:
+Document required variables in `.env.example` using placeholder values only. Never commit `.env`, production credentials, or real user data.
 
-- `DATABASE_URL`
-- `AUTH_SECRET` or the secret name required by the chosen NextAuth.js version
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
+### Neon PostgreSQL
 
-Use the exact secret variable conventions required by the installed auth integration. Never commit `.env`, production credentials, or real user data.
+- Create the project and database in Neon.
+- Set `DATABASE_URL` to the Neon connection string used by the deployed application. Use the provider-recommended pooled connection string for normal serverless application traffic where appropriate.
+- If Prisma migrations require a separate direct connection, configure `DIRECT_URL` only when supported and needed by the installed Prisma version; keep the runtime and migration connection roles clear.
+- Keep credentials server-side. Do not expose either connection string through a `NEXT_PUBLIC_` variable.
+- Run schema changes through committed Prisma migrations. Never rely on a local-only schema change.
+
+### Cloudinary
+
+- Configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in local environment settings and the deployment provider's secret settings.
+- Keep the API secret server-only. Do not expose it to client components or browser bundles.
+- Use a server-authorized upload flow with explicit format and size limits. Store the resulting asset reference in Neon only after the upload succeeds.
+
+### Application authentication
+
+- Set `AUTH_SECRET` or the exact secret variable required by the installed NextAuth.js version.
+- Finalize variable names against the actual installed auth and Prisma versions before implementation. Keep `.env.example` limited to variable names and safe placeholders.
 
 ## 14. Team conventions
 
