@@ -50,7 +50,7 @@ The project stack is defined as:
 - **Database:** Neon Postgres
 - **ORM:** Prisma
 - **Authentication:** NextAuth.js Credentials
-- **Photo uploads:** Cloudinary
+- **Photo uploads:** Neon Object Storage (private bucket: `assets`)
 - **Forms and validation:** React Hook Form and Zod
 - **Package manager:** pnpm
 - **Deployment target:** Vercel
@@ -98,7 +98,7 @@ Open the local URL printed in your terminal, usually `http://localhost:3000`.
 
 Features such as the database, authentication, and photo uploads will require environment variables. The team should maintain an `.env.example` listing required variable names and safe placeholders. Create your local `.env` file from that template and supply your own development credentials.
 
-**Never commit `.env` files, database passwords, authentication secrets, or Cloudinary secrets.** Do not expose server-only secrets through variables prefixed with `NEXT_PUBLIC_`.
+**Never commit `.env` files, database passwords, authentication secrets, or Neon Object Storage credentials.** The `assets` bucket is private. Do not expose server-only secrets through variables prefixed with `NEXT_PUBLIC_`.
 
 Exact variable names and database migration commands should be documented here once the corresponding setup issues are implemented.
 
