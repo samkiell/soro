@@ -22,7 +22,7 @@ Why: this is easier for a learner-heavy team to understand, test, deploy, and ma
 - NextAuth.js Credentials provider, using the version compatible with the project setup
 - Zod for input validation
 - React Hook Form for client-side forms
-- Cloudinary for optional report photo uploads
+- Neon Object Storage for optional report photo uploads, using the private `assets` bucket
 - Vercel for deployment
 - Vitest for unit tests and Playwright for critical end-to-end flows
 
@@ -69,7 +69,7 @@ src/
     auth/
     db/
     validation/
-    cloudinary/
+    storage/
     permissions/
   server/
     services/
@@ -174,20 +174,20 @@ Use these application statuses consistently:
 
 Do not make a report appear resolved just because an admin opened it or added a note.
 
-## 8. File upload boundary: Cloudinary
+## 8. File upload boundary: Neon Object Storage
 
-Cloudinary is the approved image storage and delivery provider for optional incident photos. Neon stores application records and Cloudinary asset references; image binaries do not belong in PostgreSQL.
+Use Neon Object Storage for optional incident-photo binaries. The configured bucket name is `assets` and its visibility is **Private**. Neon Postgres stores report metadata and the storage object key, not image binaries.
 
 - Uploads are optional and must not block a text-only report.
 - Validate file type, size, and upload authorization on the server; do not trust filename extensions or client-provided MIME types alone.
-- Use server-side Cloudinary credentials. Never expose `CLOUDINARY_API_SECRET` in browser code or prefix it with `NEXT_PUBLIC_`.
-- Prefer a server-created signed upload flow or a server-side upload endpoint. Generate signatures on the server and enforce allowed formats, size limits, and an appropriate upload folder.
-- Accept only the supported image types and document the maximum size before implementation.
-- Store the Cloudinary `public_id`, secure delivery URL, and only other metadata the application genuinely needs.
-- Avoid embedding names, incident descriptions, or other private details in public asset URLs or filenames.
-- Decide whether assets must be private or access-controlled before production. Do not assume an unlisted URL makes sensitive incident photos private.
+- Use Neon Object Storage's supported server-side/S3-compatible credentials and API. Keep access keys and secrets in server-only environment variables; never expose them through `NEXT_PUBLIC_` variables or browser bundles.
+- Confirm the current Neon Object Storage SDK/API and required environment variable names before implementation. Do not invent endpoint URLs or credentials.
+- Upload to the private `assets` bucket and store only the object key plus necessary metadata in the report record. Do not treat object keys as public URLs.
+- Serve or download photos only after checking the viewer's authorization for the related report. Use the provider's supported authorized access mechanism; do not make the bucket public to simplify display.
+- Accept only supported image types and enforce a documented maximum file size on the server.
+- Avoid embedding names, incident descriptions, or other private details in object keys or metadata.
 - Handle failed uploads gracefully and allow the user to submit without a photo.
-- Define cleanup behavior for abandoned uploads and deleted reports so unused assets do not accumulate.
+- Define cleanup behavior for abandoned uploads and deleted reports so unused objects do not accumulate.
 
 ## 9. Route and permission matrix
 
@@ -247,11 +247,12 @@ Document required variables in `.env.example` using placeholder values only. Nev
 - Keep credentials server-side. Do not expose either connection string through a `NEXT_PUBLIC_` variable.
 - Run schema changes through committed Prisma migrations. Never rely on a local-only schema change.
 
-### Cloudinary
+### Neon Object Storage
 
-- Configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in local environment settings and the deployment provider's secret settings.
-- Keep the API secret server-only. Do not expose it to client components or browser bundles.
-- Use a server-authorized upload flow with explicit format and size limits. Store the resulting asset reference in Neon only after the upload succeeds.
+- Configure the Neon Object Storage credentials and endpoint using the current provider documentation and the project's chosen SDK/API.
+- Use the private bucket named `assets`.
+- Keep storage credentials server-only. Never expose them in client components, browser bundles, or `NEXT_PUBLIC_` variables.
+- Use a server-authorized upload and retrieval flow with explicit format, size, and report-access checks. Store the object key in Neon only after upload succeeds.
 
 ### Application authentication
 
