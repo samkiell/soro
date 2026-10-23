@@ -3,12 +3,14 @@
 Before coding, read `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DESIGN_SYSTEM.md`, `docs/TASKS.md`, and the complete issue assigned by the user. Inspect existing code and follow the acceptance criteria.
 
 ## Git workflow
-- Work on a focused branch created from the latest `dev` branch.
-- Never push feature work directly to `main` and never open a PR targeting `main`.
-- If `dev` is missing, stop and ask. Do not substitute `main`.
+- Work on a focused branch created from the latest `main` branch.
+- All completed work must land on `main`. Open pull requests with base `main`.
+- Never push feature work directly to `main`; use a focused branch and a pull request.
+- If `main` is missing or inaccessible, stop and ask. Do not substitute another branch.
 - Preserve unrelated changes. Do not reset or discard work from others.
-- Commit only relevant files, push the branch, and open a PR with base `dev`.
-- Link the relevant issue and include `Closes #N` when appropriate.
+- Commit only relevant files, push the branch, and open a PR targeting `main`.
+- Every PR that addresses a GitHub issue must include the exact closing keyword and issue number in its description, e.g. `Closes #123`. Include the issue link as well. Do not use “when appropriate” for issue-linked work; if the PR fixes or completes an issue, the closing reference is mandatory.
+- If one PR addresses multiple issues, include a separate closing reference for each, such as `Closes #123` and `Fixes #124`.
 - Do not merge or deploy unless explicitly authorized.
 
 ## Implementation
