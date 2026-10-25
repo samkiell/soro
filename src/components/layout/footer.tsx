@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Shield, Headphones, Users } from "lucide-react";
+import { FIRE_SERVICE } from "@/features/emergency/contacts";
 
 export function Footer() {
   return (
@@ -40,10 +41,14 @@ export function Footer() {
         <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-xs leading-relaxed text-amber-950">
           <p className="font-bold text-amber-900">Emergency Protocol Notice</p>
           <p className="mt-1">
-            Soro is an incident logging and management platform. Submitting a report does <strong>not</strong> automatically dispatch responders. For active, life-threatening emergencies, call the campus emergency desk directly:{" "}
-            <a href="tel:08162214241" className="inline-flex items-center gap-1 font-bold text-danger underline hover:text-red-800">
-              <Phone className="h-3 w-3" /> 08162214241
-            </a>.
+            Soro is an incident logging and management platform. Submitting a report does <strong>not</strong> automatically dispatch responders. For active, life-threatening emergencies, call the {FIRE_SERVICE.name.toLowerCase()} directly:{" "}
+            <a href={FIRE_SERVICE.href} className="inline-flex items-center gap-1 font-bold text-danger underline hover:text-red-800">
+              <Phone className="h-3 w-3" aria-hidden="true" /> {FIRE_SERVICE.display}
+            </a>{" "}
+            or see all{" "}
+            <Link href="/emergency" className="font-semibold underline hover:text-amber-800">
+              emergency contacts
+            </Link>.
           </p>
         </div>
 
