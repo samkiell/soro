@@ -130,29 +130,27 @@ Client-side validation improves usability but is never a security boundary. A hi
 
 **Locked integration contract:** Exact Prisma field names, enum values, create-report signature, and photo upload flow are defined in [REPORT_API_CONTRACT.md](./REPORT_API_CONTRACT.md). Frontend and backend work must follow it.
 
-Use Prisma models with explicit relations and timestamps. Final field names and optional profile fields must be agreed in the Prisma schema before migrations are created.
+Use Prisma models with explicit relations and timestamps. The implemented schema is in `prisma/schema.prisma` (Prisma 7, `prisma-client` generator, Neon driver adapter) with the initial migration in `prisma/migrations/`.
 
 ### User
-- Unique ID
-- Name and normalized email
-- Password hash
-- Role: `STUDENT` or `ADMIN`
-- Created and updated timestamps
+- `id` (cuid), `name`, `email` (unique, stored lowercased)
+- `passwordHash` (bcrypt, cost 12)
+- `role`: `STUDENT` (default for every registration) or `ADMIN` (granted only by `pnpm db:seed`)
+- `createdAt`, `updatedAt`
 
-### IncidentReport
-- Unique ID
-- Reporter relation when the report is attributable
-- Title and description
-- Location
-- Incident type
-- Urgency
-- Anonymous flag
-- Optional photo URL and provider asset identifier
-- Status: `RECEIVED`, `IN_PROGRESS`, or `RESOLVED`
-- Created and updated timestamps
+### Report
+- Fields exactly as in [REPORT_API_CONTRACT.md](./REPORT_API_CONTRACT.md): `reporterId`, `title`, `description`, `location`, `incidentType`, `urgency`, `isAnonymous`, optional `photoKey` (unique), `status`, `createdAt`, `updatedAt`.
+- Indexed on `(reporterId, createdAt)`, `(status, createdAt)`, and `createdAt`.
 
-### Report status history
-Keep an append-only history of status changes, including the report, previous and new status where applicable, actor, timestamp, and an optional internal note. If the PRD requires separate student-visible updates, distinguish them from admin-only notes at the data-model and API levels.
+### ReportStatusHistory (student-visible)
+- Append-only: `reportId`, `fromStatus` (null for the initial entry), `toStatus`, `changedById` (the admin), `createdAt`.
+- The initial `RECEIVED` entry is created in the same insert as the report and records **no actor**, so an anonymous reporter never appears in the history.
+
+### ReportNote (admin-only)
+- `reportId`, `authorId`, `body`, `createdAt`. Stored in its own table and only ever read by admin services, so notes cannot leak through student-facing queries.
+
+### What "anonymous" means in Soro
+An anonymous report still stores `reporterId` so the student can follow their own report. Admin services remove the reporter's name and email before returning an anonymous report, so they never reach a page or API response. People with direct database access can still see the link. The report form states this.
 
 ### Data-model rules
 - Use database constraints for uniqueness and required relations.
@@ -176,6 +174,8 @@ Use these application statuses consistently:
 
 Do not make a report appear resolved just because an admin opened it or added a note.
 
+Implemented transitions (`src/lib/permissions/policies.ts`): `RECEIVED → IN_PROGRESS | RESOLVED`, `IN_PROGRESS → RECEIVED | RESOLVED`, and `RESOLVED → IN_PROGRESS` (reopen). A status update and its history entry are written in one transaction, guarded against concurrent changes.
+
 ## 8. File upload boundary: Neon Object Storage
 
 Use Neon Object Storage for optional incident-photo binaries. The configured bucket name is `assets` and its visibility is **Private**. Neon Postgres stores report metadata and the storage object key, not image binaries.
@@ -190,6 +190,15 @@ Use Neon Object Storage for optional incident-photo binaries. The configured buc
 - Avoid embedding names, incident descriptions, or other private details in object keys or metadata.
 - Handle failed uploads gracefully and allow the user to submit without a photo.
 - Define cleanup behavior for abandoned uploads and deleted reports so unused objects do not accumulate.
+
+### As implemented
+
+- **Client:** `@aws-sdk/client-s3` pointed at Neon's S3 endpoint with `forcePathStyle`. Variables: `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (per Neon's docs).
+- **Upload:** `POST /api/uploads` (FormData, one `file` field). It requires a signed-in student and same-origin request, caps size at 4 MB (under Vercel's 4.5 MB body limit), and accepts JPEG, PNG, or WebP detected from the file's bytes. It returns `{ success: true, photoKey }`.
+- **Keys:** `reports/<uploaderUserId>/<uuid>.<ext>`. No names or report content. `createReport` only accepts a key under the caller's own prefix that exists in the bucket and isn't attached to another report.
+- **Viewing:** `GET /api/reports/[id]/photo` checks that the viewer is the reporter or an admin, then streams the object with `Cache-Control: private, no-store`. Keys and storage URLs never reach the browser. Unauthorized and missing photos both return 404.
+- **Cleanup:** `pnpm storage:cleanup [--apply]` deletes objects older than 24 hours that no report references. That covers abandoned uploads and photos of deleted reports.
+- **Not yet done:** photo metadata (EXIF location, device) is not stripped. The form warns students about this.
 
 ## 9. Route and permission matrix
 

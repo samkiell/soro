@@ -5,7 +5,7 @@ SWEP 200 · Group 10 · Obafemi Awolowo University (OAU)
 
 Soro is a campus safety project designed to help students submit incident reports, follow their status, and find emergency contact information in one place. It also provides an administrative workspace for authorized staff to review reports and record progress.
 
-> **Project status:** In development. Features described here are the intended scope and may not all be implemented yet. Check the GitHub issues for current work.
+> **Project status:** In development. Sign-in, report submission, emergency information, photo uploads, and admin report management are implemented. The student dashboard and student report-detail pages are still in progress. See [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for the current feature status.
 
 ## Why Soro?
 
@@ -61,46 +61,93 @@ Please coordinate with the team before changing these choices.
 
 - [Product Requirements Document](docs/PRD.md): project scope, users, requirements, privacy, and acceptance criteria.
 - [Task Breakdown](docs/TASKS.md): implementation tasks, suggested ownership, and delivery checks.
+- [Architecture](docs/ARCHITECTURE.md) and [Report API contract](docs/REPORT_API_CONTRACT.md): how the system fits together and the locked data contract.
+- [Demo script and feature status](docs/DEMO_SCRIPT.md): what is implemented, how to demo it, and known limitations.
 - [GitHub Issues](https://github.com/samkiell/soro/issues): task-specific instructions and progress.
 
 ## Getting started
 
-The application scaffold is being handled in [Issue #1](https://github.com/samkiell/soro/issues/1). Once the scaffold and dependency files are committed, use the following workflow.
-
 ### Prerequisites
 
 Install:
-- A supported Node.js LTS version.
-- pnpm.
+- Node.js 22 LTS (22.12+) or 24 LTS. Prisma 7 and Vitest 5 require one of these.
+- pnpm 11 (`corepack enable` picks up the version pinned in `package.json`).
 - Git.
+- A [Neon](https://neon.com) project in a region that supports Neon Object Storage (for example AWS US East (Ohio)), with a **private** bucket named `assets`.
 
-### Get the code
+### Get the code and install
 
 ```bash
 git clone https://github.com/samkiell/soro.git
 cd soro
+pnpm install        # also runs `prisma generate`
 ```
-
-### Install dependencies and start development
-
-After the project scaffold and `package.json` are available:
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Open the local URL printed in your terminal, usually `http://localhost:3000`.
-
-> These commands depend on the scaffold being merged. If the repository does not yet contain a `package.json`, follow Issue #1 rather than assuming the app is ready to run.
 
 ### Environment variables
 
-Features such as the database, authentication, and photo uploads will require environment variables. The team should maintain an `.env.example` listing required variable names and safe placeholders. Create your local `.env` file from that template and supply your own development credentials.
+Copy the template and fill in your own **development** values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Neon **pooled** connection string (host contains `-pooler`). Used by the app. |
+| `DATABASE_URL_UNPOOLED` | Neon **direct** connection string. Used by Prisma CLI for migrations and seeding. |
+| `AUTH_SECRET` | Session signing secret. Generate with `openssl rand -base64 32`. `NEXTAUTH_SECRET` also works. |
+| `AUTH_URL` | The app's base URL, for example `http://localhost:3000`. Needed for `pnpm start` outside Vercel. |
+| `AWS_ENDPOINT_URL_S3`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Neon Object Storage credentials with `storage:read` and `storage:write` (Neon Console → Connect → Storage, or `neon env pull`). |
+| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_ADMIN_NAME` | Optional. Used once by `pnpm db:seed` to create the first admin. |
 
 **Never commit `.env` files, database passwords, authentication secrets, or Neon Object Storage credentials.** The `assets` bucket is private. Do not expose server-only secrets through variables prefixed with `NEXT_PUBLIC_`.
 
-Exact variable names and database migration commands should be documented here once the corresponding setup issues are implemented.
+If storage variables are missing, the app still works and reports can be submitted without photos; uploads return a clear "not available" message.
+
+### Set up the database
+
+```bash
+pnpm db:deploy      # apply committed migrations (prisma migrate deploy)
+pnpm db:seed        # optional: create or promote the admin in SEED_ADMIN_EMAIL
+```
+
+Registration always creates **student** accounts. The seed script is the only way to create an admin; it never changes an existing account's password.
+
+When you change `prisma/schema.prisma`, create a migration with `pnpm db:migrate` against a development branch, never production, and commit the generated folder in `prisma/migrations/`.
+
+### Run the app
+
+```bash
+pnpm dev
+```
+
+Open `http://localhost:3000`.
+
+### Checks
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test          # Vitest unit tests in tests/unit
+pnpm db:validate   # Prisma schema validation
+pnpm build
+```
+
+### Photo storage maintenance
+
+Abandoned uploads (a photo uploaded but the report never submitted) and photos of deleted reports are removed by a cleanup script. It only deletes objects older than 24 hours that no report references.
+
+```bash
+pnpm storage:cleanup           # dry run: reports how many would be deleted
+pnpm storage:cleanup --apply   # deletes them
+```
+
+### Deploying to Vercel
+
+1. Import the repository in Vercel. The default build (`pnpm install` → `next build`) works; `prisma generate` runs on install.
+2. Add the environment variables above in Project Settings. `AUTH_URL` is optional on Vercel.
+3. Run `pnpm db:deploy` against the production database before (or as part of) the first deploy.
+4. Uploads are limited to 4 MB per photo to stay within Vercel's request size limit.
 
 ## How to contribute
 
