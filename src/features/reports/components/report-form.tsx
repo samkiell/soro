@@ -256,12 +256,21 @@ export function ReportForm() {
           .
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="button" onClick={() => setSubmitted(null)}>
+          <Link
+            href={`/report/${submitted.id}`}
+            className={buttonVariants({ variant: "default" })}
+          >
+            View report details
+          </Link>
+          <Link
+            href="/dashboard"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Go to my dashboard
+          </Link>
+          <Button type="button" variant="ghost" onClick={() => setSubmitted(null)}>
             Submit another report
           </Button>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
-            Back to home
-          </Link>
         </div>
       </div>
     );

@@ -103,9 +103,14 @@ async function HeaderActions() {
           Admin
         </Link>
       ) : (
-        <Link href="/report/new" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-          New report
-        </Link>
+        <>
+          <Link href="/dashboard" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            Dashboard
+          </Link>
+          <Link href="/report/new" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            New report
+          </Link>
+        </>
       )}
       <span className="hidden max-w-[10rem] truncate text-sm text-text-secondary md:inline">
         {user.name}

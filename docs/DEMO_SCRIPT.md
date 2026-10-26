@@ -15,8 +15,8 @@ This page is for the documentation and presentation team (issue #11) and for any
 | Admin overview with live counts | Implemented | `/admin` |
 | Admin report list with status, urgency, and type filters | Implemented | `/admin/reports` |
 | Admin report review, status updates, and internal notes | Implemented | `/admin/reports/[id]` |
-| Student dashboard (list of my reports) | Planned (issue #5) | `/dashboard` |
-| Student report details and status history | Planned (issue #6) | `/report/[id]` |
+| Student dashboard (list of my reports) | Implemented | `/dashboard` |
+| Student report details and status history | Implemented | `/report/[id]` |
 | Rate limiting on sign-in and report submission | Planned | |
 | Removing hidden photo metadata (location, device) | Planned | |
 
@@ -51,8 +51,7 @@ This page is for the documentation and presentation team (issue #11) and for any
 
 - **No emergency dispatch.** The call button opens the phone's dialer. Soro does not place calls, send alerts, share location, or notify responders.
 - **Emergency number not yet verified.** The number 08162214241 comes from the project brief and must be verified by the team before release.
-- **Students can't yet view their submitted reports** (issues #5 and #6). The confirmation screen shows a reference number in the meantime.
-- **Anonymity is limited to the app.** Anonymous reports hide the reporter from admins in Soro, but the database still links the report to the student's account.
+- **Anonymity is limited to the app.** Anonymous reports hide the reporter from admins in Soro, but the database still links the report to the student's account so the student can track progress.
 - **Photo metadata is kept.** Photos may contain hidden location or device details. The form warns about this.
 - **No rate limiting yet** on sign-in, registration, or report submission.
 - **No email verification or password reset.**
