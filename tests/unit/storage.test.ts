@@ -58,3 +58,24 @@ describe("readStorageConfig", () => {
     ).toMatchObject({ region: "us-east-2", accessKeyId: "id" });
   });
 });
+
+describe("local storage fallback", () => {
+  it("uploads, verifies, reads, and deletes a photo locally when S3 is unconfigured", async () => {
+    const { uploadPhoto, photoExists, getPhoto, deletePhoto } = await import("@/lib/storage/photos");
+    const testKey = buildPhotoKey("cstudent1", "png", "123e4567-e89b-42d3-a456-426614174999");
+    const sampleBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+
+    expect(await photoExists(testKey)).toBe(false);
+
+    await uploadPhoto(testKey, sampleBytes, "image/png");
+    expect(await photoExists(testKey)).toBe(true);
+
+    const photo = await getPhoto(testKey);
+    expect(photo).not.toBeNull();
+    expect(photo?.contentType).toBe("image/png");
+    expect(photo?.contentLength).toBe(sampleBytes.byteLength);
+
+    await deletePhoto(testKey);
+    expect(await photoExists(testKey)).toBe(false);
+  });
+});
