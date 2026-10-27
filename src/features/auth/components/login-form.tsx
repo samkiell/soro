@@ -96,7 +96,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               {...register("identifier")}
               type="text"
               autoComplete="username"
-              placeholder="e.g. swe/2023/001 or e.samuel.swe2023072@student.oauife.edu.ng"
+              placeholder="e.g. swe/2023/001 or j.doe2023001@student.oauife.edu.ng"
               className="pr-4"
             />
           </div>

@@ -112,7 +112,7 @@ export function ReportPhoto({ reportId }: { reportId: string }) {
         onClick={() => setIsOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className="group relative block w-fit overflow-hidden rounded-xl border border-border bg-slate-50 text-left shadow-2xs transition-all hover:border-brand/40 hover:shadow-md focus:outline-hidden focus:ring-2 focus:ring-brand/30"
+        className="group relative block w-fit max-w-full overflow-hidden rounded-xl border border-border bg-slate-50 text-left shadow-2xs transition-all hover:border-brand/40 hover:shadow-md focus:outline-hidden focus:ring-2 focus:ring-brand/30"
         title="Click to view full photo in modal"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- authenticated route; the image optimizer can't forward the session */}
@@ -121,7 +121,7 @@ export function ReportPhoto({ reportId }: { reportId: string }) {
           alt="Photo evidence attached to this report"
           loading="lazy"
           onError={() => setFailed(true)}
-          className="max-h-96 w-auto rounded-xl object-contain transition-transform duration-200 group-hover:scale-[1.01]"
+          className="max-h-96 w-auto max-w-full rounded-xl object-contain transition-transform duration-200 group-hover:scale-[1.01]"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
           <span className="flex items-center gap-1.5 rounded-full bg-brand/90 px-3 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur-xs">

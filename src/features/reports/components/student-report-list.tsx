@@ -95,7 +95,7 @@ export function StudentReportList({ reports }: { reports: StudentReportListItem[
         <div
           role="tablist"
           aria-label="Filter reports by status"
-          className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-border bg-surface-muted p-1"
+          className="flex w-full items-center gap-1 overflow-x-auto rounded-lg border border-border bg-surface-muted p-1 no-scrollbar sm:inline-flex sm:w-auto"
         >
           {tabs.map((tab) => {
             const isActive = selectedStatus === tab.id;
@@ -107,7 +107,7 @@ export function StudentReportList({ reports }: { reports: StudentReportListItem[
                 aria-selected={isActive}
                 onClick={() => setSelectedStatus(tab.id)}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition-all focus-visible:outline-2 focus-visible:outline-brand",
+                  "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition-all focus-visible:outline-2 focus-visible:outline-brand",
                   isActive
                     ? "bg-white text-ink shadow-2xs"
                     : "text-text-secondary hover:text-ink hover:bg-white/50",

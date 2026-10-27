@@ -65,6 +65,7 @@ describe("local storage fallback", () => {
     const testKey = buildPhotoKey("cstudent1", "png", "123e4567-e89b-42d3-a456-426614174999");
     const sampleBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
+    await deletePhoto(testKey);
     expect(await photoExists(testKey)).toBe(false);
 
     await uploadPhoto(testKey, sampleBytes, "image/png");

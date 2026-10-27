@@ -128,7 +128,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
             {...control}
             {...register("name")}
             autoComplete="name"
-            placeholder="e.g. Samuel Olawale"
+            placeholder="e.g. John Doe"
           />
         )}
       </FormField>
@@ -171,10 +171,10 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
               })}
               type="text"
               autoComplete="email"
-              placeholder="e.samuel.swe2023072"
-              className="rounded-r-none border-r-0"
+              placeholder="j.doe2023001"
+              className="min-w-0 flex-1 rounded-r-none border-r-0 text-sm"
             />
-            <span className="inline-flex select-none items-center rounded-r-lg border border-border bg-warm-cream/70 px-3 text-xs font-semibold text-text-secondary sm:text-xs">
+            <span className="inline-flex shrink-0 select-none items-center rounded-r-lg border border-border bg-warm-cream/70 px-2 text-[11px] font-semibold text-text-secondary sm:px-3 sm:text-xs">
               @student.oauife.edu.ng
             </span>
           </div>

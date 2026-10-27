@@ -82,7 +82,7 @@ export function StudentStatusUpdate({ reportId, currentStatus, isOwner }: Props)
             size="sm"
             onClick={() => handleToggleStatus("IN_PROGRESS")}
             disabled={pending}
-            className="border-brand/40 text-brand hover:bg-brand/5 gap-1.5 font-bold"
+            className="w-full sm:w-auto justify-center border-brand/40 text-brand hover:bg-brand/5 gap-1.5 font-bold"
           >
             <Refresh className={`h-3.5 w-3.5 ${pending ? "animate-spin" : ""}`} />
             {pending ? "Updating status..." : "Reopen: Still happening"}
@@ -94,7 +94,7 @@ export function StudentStatusUpdate({ reportId, currentStatus, isOwner }: Props)
             size="sm"
             onClick={() => handleToggleStatus("RESOLVED")}
             disabled={pending}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 font-bold shadow-xs"
+            className="w-full sm:w-auto justify-center bg-emerald-700 hover:bg-emerald-800 text-white gap-1.5 font-bold shadow-xs"
           >
             <CheckCircle className="h-3.5 w-3.5" />
             {pending ? "Updating status..." : "Mark as Ended / No Longer Happening"}

@@ -125,7 +125,7 @@ export default function HomePage() {
                   </div>
                   <a
                     href="tel:08162214241"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-danger px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-800 transition-colors shrink-0"
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-danger px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-800 transition-colors sm:w-auto sm:shrink-0"
                   >
                     <PhoneCall className="h-3 w-3" /> Call Fire Service (08162214241)
                   </a>

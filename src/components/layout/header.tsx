@@ -73,12 +73,12 @@ async function HeaderActions() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2.5">
         <Link
           href="/login"
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "border-border bg-white text-ink hover:bg-surface-muted font-medium",
+            "border-border bg-white text-ink hover:bg-surface-muted px-2.5 text-xs sm:px-3 sm:text-sm font-medium",
           )}
         >
           Login
@@ -87,7 +87,7 @@ async function HeaderActions() {
           href="/register"
           className={cn(
             buttonVariants({ variant: "secondary", size: "sm" }),
-            "bg-gold text-ink hover:bg-gold-hover font-semibold shadow-2xs",
+            "bg-gold text-ink hover:bg-gold-hover px-2.5 text-xs sm:px-3 sm:text-sm font-semibold shadow-2xs",
           )}
         >
           Register
@@ -97,17 +97,26 @@ async function HeaderActions() {
   }
 
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-1.5 sm:gap-2.5">
       {user.role === "ADMIN" ? (
-        <Link href="/admin" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+        <Link
+          href="/admin"
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "px-2 text-xs sm:px-3 sm:text-sm font-semibold")}
+        >
           Admin
         </Link>
       ) : (
         <>
-          <Link href="/dashboard" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          <Link
+            href="/dashboard"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "px-2 text-xs sm:px-3 sm:text-sm font-semibold")}
+          >
             Dashboard
           </Link>
-          <Link href="/report/new" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          <Link
+            href="/report/new"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "hidden sm:inline-flex px-2 text-xs sm:px-3 sm:text-sm font-semibold")}
+          >
             New report
           </Link>
         </>
@@ -116,7 +125,12 @@ async function HeaderActions() {
         {user.name}
       </span>
       <form action={signOutAction}>
-        <Button type="submit" variant="outline" size="sm">
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
+          className="px-2.5 text-xs sm:px-3 sm:text-sm font-medium"
+        >
           Sign out
         </Button>
       </form>

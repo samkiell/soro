@@ -62,7 +62,7 @@ describe("auth schemas", () => {
   it("rejects invalid emails and short passwords on registration", () => {
     const result = registerSchema.safeParse({
       name: "Ada",
-      matricNumber: "SWE/2023/072",
+      matricNumber: "SWE/2023/001",
       email: "not-an-email",
       password: "short",
       confirmPassword: "short",
@@ -74,7 +74,7 @@ describe("auth schemas", () => {
   it("requires matching passwords", () => {
     const result = registerSchema.safeParse({
       name: "Ada",
-      matricNumber: "SWE/2023/072",
+      matricNumber: "SWE/2023/001",
       email: "ada@student.oauife.edu.ng",
       password: "long-enough-1",
       confirmPassword: "long-enough-2",
@@ -85,7 +85,7 @@ describe("auth schemas", () => {
   it("does not allow choosing a role at registration", () => {
     const result = registerSchema.safeParse({
       name: "Ada",
-      matricNumber: "SWE/2023/072",
+      matricNumber: "SWE/2023/001",
       email: "ada@student.oauife.edu.ng",
       password: "long-enough-1",
       confirmPassword: "long-enough-1",
