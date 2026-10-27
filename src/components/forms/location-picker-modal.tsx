@@ -23,7 +23,13 @@ import {
   requestDeviceLocation,
   type LocationFailure,
 } from "@/lib/geolocation";
-import { OAU_CAMPUS_CENTER, type Place } from "@/lib/places";
+import {
+  OAU_CAMPUS_CENTER,
+  OAU_LANDMARKS,
+  formatCampusFallbackLocation,
+  isGenericLocation,
+  type Place,
+} from "@/lib/places";
 
 type LocationPickerModalProps = {
   isOpen: boolean;
@@ -31,18 +37,6 @@ type LocationPickerModalProps = {
   onConfirm: (locationText: string) => void;
   initialLocation?: string;
 };
-
-const OAU_LANDMARKS: Array<{ name: string; coords: [number, number] }> = [
-  { name: "Senate Building", coords: [4.5284, 7.5186] },
-  { name: "Hezekiah Library", coords: [4.5262, 7.5195] },
-  { name: "Amphitheatre", coords: [4.5273, 7.5188] },
-  { name: "Spider Building", coords: [4.527, 7.5165] },
-  { name: "Moremi Hall", coords: [4.5225, 7.517] },
-  { name: "Awo Hall", coords: [4.521, 7.525] },
-  { name: "Fajuyi Hall", coords: [4.524, 7.522] },
-  { name: "SUB (Student Union)", coords: [4.5255, 7.5205] },
-  { name: "Health Centre", coords: [4.531, 7.515] },
-];
 
 export function LocationPickerModal({
   isOpen,
@@ -185,15 +179,15 @@ export function LocationPickerModal({
               if (signal.aborted || cancelled) return;
               if (res.ok) {
                 const data = (await res.json()) as { place?: Place | null };
-                if (data.place?.label) {
+                if (data.place?.label && !isGenericLocation(data.place.label)) {
                   setResolvedAddress(data.place.label);
                 } else {
-                  setResolvedAddress(`Coordinates: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+                  setResolvedAddress(formatCampusFallbackLocation(lat, lng));
                 }
               }
             } catch {
               if (!signal.aborted) {
-                setResolvedAddress(`OAU Campus (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+                setResolvedAddress(formatCampusFallbackLocation(lat, lng));
               }
             } finally {
               if (!signal.aborted) setIsResolving(false);

@@ -23,6 +23,15 @@ export function canViewReport(
   return isAdmin(actor) || report.reporterId === actor.id;
 }
 
+/** Admins can update any report; students can update their own (e.g. mark ended or reopen). */
+export function canUpdateReportStatus(
+  actor: Actor | null | undefined,
+  report: { reporterId: string },
+): boolean {
+  if (!actor) return false;
+  return isAdmin(actor) || report.reporterId === actor.id;
+}
+
 const ALLOWED_TRANSITIONS: Record<ReportStatus, readonly ReportStatus[]> = {
   [ReportStatus.RECEIVED]: [ReportStatus.IN_PROGRESS, ReportStatus.RESOLVED],
   [ReportStatus.IN_PROGRESS]: [ReportStatus.RECEIVED, ReportStatus.RESOLVED],

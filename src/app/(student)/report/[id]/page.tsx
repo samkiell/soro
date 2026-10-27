@@ -3,19 +3,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import {
-  AlertTriangle,
   ArrowLeft,
   Calendar,
-  CheckCircle2,
+  CheckCircle,
   Clock,
-  EyeOff,
+  EyeClosed,
   MapPin,
-  PhoneCall,
+  Phone,
   ShieldCheck,
-} from "lucide-react";
+  WarningTriangle,
+} from "iconoir-react";
 import { StatusBadge, UrgencyBadge } from "@/components/reports/report-badges";
 import { ReportPhoto } from "@/components/reports/report-photo";
 import { buttonVariants } from "@/components/ui/button";
+import { StudentStatusUpdate } from "@/features/reports/components/student-status-update";
 import { INCIDENT_TYPE_LABELS, STATUS_LABELS } from "@/features/reports/labels";
 import { formatDateTime, reportReference } from "@/lib/format";
 import { getCurrentUser } from "@/lib/permissions";
@@ -96,7 +97,7 @@ async function ReportDetailContent({ params }: { params: Params }) {
           <UrgencyBadge urgency={report.urgency} />
           {report.isAnonymous && (
             <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-text-secondary">
-              <EyeOff className="h-3 w-3 text-text-muted" aria-hidden="true" />
+              <EyeClosed className="h-3 w-3 text-text-muted" aria-hidden="true" />
               Anonymous report
             </span>
           )}
@@ -120,6 +121,31 @@ async function ReportDetailContent({ params }: { params: Params }) {
 
       {/* Visual Status Progress Tracker */}
       <StatusProgressTracker currentStatus={report.status} />
+
+      {/* Student/Reporter Incident Status Control */}
+      {report.isOwner && (
+        <StudentStatusUpdate
+          reportId={report.id}
+          currentStatus={report.status}
+          isOwner={report.isOwner}
+        />
+      )}
+
+      {/* Admin Link if viewing as admin */}
+      {user?.role === "ADMIN" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/30 bg-brand/5 p-4">
+          <div>
+            <p className="text-sm font-bold text-brand">Admin Console Access</p>
+            <p className="text-xs text-text-secondary">You are viewing this report as an administrator.</p>
+          </div>
+          <Link
+            href={`/admin/reports/${report.id}`}
+            className={buttonVariants({ variant: "default", size: "sm" })}
+          >
+            Review & Update in Admin
+          </Link>
+        </div>
+      )}
 
       {/* Main Grid: Details + Timeline */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -252,7 +278,7 @@ async function ReportDetailContent({ params }: { params: Params }) {
             className="flex flex-col gap-3 rounded-xl border border-gold/40 bg-light-gold/50 p-5 shadow-2xs"
           >
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-brand" aria-hidden="true" />
+              <WarningTriangle className="h-5 w-5 text-brand" aria-hidden="true" />
               <h3 id="emergency-card-heading" className="font-bold text-ink">
                 Has the situation escalated?
               </h3>
@@ -267,7 +293,7 @@ async function ReportDetailContent({ params }: { params: Params }) {
                 "mt-1 inline-flex w-full items-center justify-center gap-2 font-bold shadow-xs",
               )}
             >
-              <PhoneCall className="h-4 w-4" aria-hidden="true" />
+              <Phone className="h-4 w-4" aria-hidden="true" />
               Call 08162214241
             </a>
             <Link
@@ -353,7 +379,7 @@ function StatusProgressTracker({ currentStatus }: { currentStatus: ReportStatus 
                   {step.title}
                 </span>
                 {isCompleted && (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                  <CheckCircle className="h-4 w-4 text-emerald-600" aria-hidden="true" />
                 )}
                 {isCurrent && (
                   <Clock className="h-4 w-4 text-brand animate-pulse" aria-hidden="true" />

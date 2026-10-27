@@ -12,18 +12,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/login" },
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { identifier: {}, email: {}, password: {} },
       async authorize(credentials) {
+        const inputIdentifier = (
+          (credentials?.identifier as string | undefined) ??
+          (credentials?.email as string | undefined) ??
+          ""
+        ).trim();
+        const inputPassword = (credentials?.password as string | undefined) ?? "";
+
         const parsed = signInSchema.safeParse({
-          email: credentials?.email,
-          password: credentials?.password,
+          identifier: inputIdentifier,
+          password: inputPassword,
         });
         if (!parsed.success) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email },
+        const raw = parsed.data.identifier.toLowerCase();
+        const normalizedMatric = parsed.data.identifier.toUpperCase();
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: raw },
+              { email: `${raw}@student.oauife.edu.ng` },
+              { matricNumber: normalizedMatric },
+              { matricNumber: { equals: parsed.data.identifier, mode: "insensitive" } },
+            ],
+          },
           select: { id: true, name: true, email: true, passwordHash: true },
         });
+
         const valid = await verifyPassword(
           parsed.data.password,
           user?.passwordHash,

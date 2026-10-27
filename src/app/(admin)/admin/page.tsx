@@ -22,7 +22,8 @@ export default function AdminOverviewPage() {
 
 async function Overview() {
   const admin = await requireAdmin("/admin");
-  const { total, byStatus, openUrgentCount, urgentQueue } = await getReportOverview(admin);
+  const { total, byStatus, openUrgentCount, urgentQueue, recentReports } =
+    await getReportOverview(admin);
 
   const stats = [
     { label: "Total reports", value: total, href: "/admin/reports" },
@@ -52,13 +53,21 @@ async function Overview() {
         </ul>
       </section>
 
-      <section aria-labelledby="urgent-heading" className="flex flex-col gap-3">
+      {openUrgentCount > 0 && (
+        <section aria-labelledby="urgent-heading" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="urgent-heading" className="text-lg font-semibold text-danger">
+              Needs attention ({openUrgentCount} open urgent)
+            </h2>
+          </div>
+          <ReportList reports={urgentQueue} />
+        </section>
+      )}
+
+      <section aria-labelledby="recent-heading" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="urgent-heading" className="text-lg font-semibold text-ink">
-            Needs attention{" "}
-            <span className="font-normal text-text-secondary">
-              ({openUrgentCount} open high or critical)
-            </span>
+          <h2 id="recent-heading" className="text-lg font-semibold text-ink">
+            Recent Reports
           </h2>
           <Link
             href="/admin/reports"
@@ -67,16 +76,12 @@ async function Overview() {
             All reports <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
-        {total === 0 ? (
+        {recentReports.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border-strong bg-white p-6 text-center text-sm text-text-secondary">
             No reports have been submitted yet.
           </p>
-        ) : urgentQueue.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border-strong bg-white p-6 text-center text-sm text-text-secondary">
-            No open high or critical reports right now.
-          </p>
         ) : (
-          <ReportList reports={urgentQueue} />
+          <ReportList reports={recentReports} />
         )}
       </section>
     </>

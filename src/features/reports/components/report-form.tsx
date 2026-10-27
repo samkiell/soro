@@ -21,7 +21,11 @@ import {
   LocationError,
   requestDeviceLocation,
 } from "@/lib/geolocation";
-import type { Place } from "@/lib/places";
+import {
+  formatCampusFallbackLocation,
+  isGenericLocation,
+  type Place,
+} from "@/lib/places";
 import { MAX_PHOTO_BYTES, PHOTO_TYPES, formatBytes } from "@/lib/storage/image";
 import {
   REPORT_LIMITS,
@@ -111,14 +115,14 @@ export function ReportForm() {
       const res = await fetch(`/api/places?lat=${coords.latitude}&lon=${coords.longitude}`);
       if (res.ok) {
         const data = (await res.json()) as { place?: Place | null };
-        if (data.place?.label) {
+        if (data.place?.label && !isGenericLocation(data.place.label)) {
           setValue("location", data.place.label, { shouldValidate: true });
           return;
         }
       }
       setValue(
         "location",
-        `OAU Campus (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`,
+        formatCampusFallbackLocation(coords.latitude, coords.longitude),
         { shouldValidate: true },
       );
     } catch (err) {
@@ -553,7 +557,7 @@ export function ReportForm() {
       <LocationPickerModal
         isOpen={isMapOpen}
         onClose={() => setIsMapOpen(false)}
-        onConfirm={(loc) => setValue("location", loc, { shouldValidate: true })}
+        onConfirm={(loc: string) => setValue("location", loc, { shouldValidate: true })}
         initialLocation={currentLocationValue}
       />
     </form>

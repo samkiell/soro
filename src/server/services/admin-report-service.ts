@@ -38,7 +38,7 @@ export type AdminReportListItem = Prisma.ReportGetPayload<{
 export async function getReportOverview(actor: Actor) {
   assertAdmin(actor);
 
-  const [byStatusRows, openUrgentCount, urgentQueue] = await Promise.all([
+  const [byStatusRows, openUrgentCount, urgentQueue, recentReports] = await Promise.all([
     prisma.report.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.report.count({
       where: { status: { in: OPEN_STATUSES }, urgency: { in: URGENT_LEVELS } },
@@ -47,6 +47,11 @@ export async function getReportOverview(actor: Actor) {
       where: { status: { in: OPEN_STATUSES }, urgency: { in: URGENT_LEVELS } },
       orderBy: { createdAt: "desc" },
       take: 5,
+      select: listSelect,
+    }),
+    prisma.report.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
       select: listSelect,
     }),
   ]);
@@ -59,7 +64,7 @@ export async function getReportOverview(actor: Actor) {
   for (const row of byStatusRows) byStatus[row.status] = row._count._all;
   const total = byStatus.RECEIVED + byStatus.IN_PROGRESS + byStatus.RESOLVED;
 
-  return { total, byStatus, openUrgentCount, urgentQueue };
+  return { total, byStatus, openUrgentCount, urgentQueue, recentReports };
 }
 
 export async function listReports(actor: Actor, filters: ReportFilters) {
@@ -98,6 +103,7 @@ export async function getReportForAdmin(actor: Actor, reportId: string) {
   assertAdmin(actor);
 
   const trimmed = reportId.trim();
+  const cleaned = trimmed.replace(/^REF-?/i, "").replace(/^#/i, "");
   const select = {
     id: true,
     title: true,
@@ -137,9 +143,14 @@ export async function getReportForAdmin(actor: Actor, reportId: string) {
     select,
   });
 
-  if (!report && trimmed.length === 8) {
+  if (!report) {
     report = await prisma.report.findFirst({
-      where: { id: { endsWith: trimmed.toLowerCase() } },
+      where: {
+        OR: [
+          { id: { equals: cleaned, mode: "insensitive" } },
+          { id: { endsWith: cleaned.toLowerCase() } },
+        ],
+      },
       select,
     });
   }

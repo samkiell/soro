@@ -45,6 +45,7 @@ model User {
   name         String
   /// Stored lowercased and trimmed.
   email        String   @unique
+  matricNumber String?  @unique
   passwordHash String
   /// Registration always creates STUDENT. ADMIN is granted only via the seed script.
   role         Role     @default(STUDENT)

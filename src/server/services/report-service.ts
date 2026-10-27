@@ -1,6 +1,12 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
-import { canCreateReport, canViewReport, type Actor } from "@/lib/permissions/policies";
+import {
+  canCreateReport,
+  canTransition,
+  canUpdateReportStatus,
+  canViewReport,
+  type Actor,
+} from "@/lib/permissions/policies";
 import type { IncidentType, ReportStatus, Urgency } from "@/generated/prisma/enums";
 import { isPhotoKeyOwnedBy } from "@/lib/storage/keys";
 import { photoExists } from "@/lib/storage/photos";
@@ -140,6 +146,7 @@ export type StudentReportDetail = {
   status: ReportStatus;
   isAnonymous: boolean;
   hasPhoto: boolean;
+  isOwner?: boolean;
   createdAt: Date;
   updatedAt: Date;
   statusHistory: Array<{
@@ -213,10 +220,53 @@ export async function getReportForStudent(
     return null;
   }
 
-  const { reporterId: _reporterId, photoKey, ...rest } = report;
-  void _reporterId;
+  const { reporterId, photoKey, ...rest } = report;
+  const isOwner = Boolean(actor && reporterId === actor.id);
   return {
     ...rest,
+    isOwner,
     hasPhoto: Boolean(photoKey),
   };
+}
+
+export async function updateReportStatusForStudent(
+  actor: Actor,
+  input: { reportId: string; status: ReportStatus },
+): Promise<{ success: true } | { success: false; error: string }> {
+  const { reportId, status } = input;
+  const trimmed = reportId.trim();
+  const cleaned = trimmed.replace(/^REF-?/i, "").replace(/^#/i, "");
+
+  const report = await prisma.report.findFirst({
+    where: {
+      OR: [
+        { id: trimmed },
+        { id: { equals: cleaned, mode: "insensitive" } },
+        { id: { endsWith: cleaned.toLowerCase() } },
+      ],
+    },
+    select: { id: true, reporterId: true, status: true },
+  });
+
+  if (!report) return { success: false, error: "NOT_FOUND" };
+  if (!canUpdateReportStatus(actor, report)) return { success: false, error: "FORBIDDEN" };
+  if (!canTransition(report.status, status)) return { success: false, error: "INVALID_TRANSITION" };
+
+  await prisma.$transaction(async (tx) => {
+    await tx.report.update({
+      where: { id: report.id },
+      data: { status },
+    });
+
+    await tx.reportStatusHistory.create({
+      data: {
+        reportId: report.id,
+        fromStatus: report.status,
+        toStatus: status,
+        changedById: actor.id,
+      },
+    });
+  });
+
+  return { success: true };
 }

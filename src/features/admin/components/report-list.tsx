@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { StatusBadge, UrgencyBadge } from "@/components/reports/report-badges";
+import { buttonVariants } from "@/components/ui/button";
 import { INCIDENT_TYPE_LABELS } from "@/features/reports/labels";
 import { formatDateTime } from "@/lib/format";
 import type { AdminReportListItem } from "@/server/services/admin-report-service";
@@ -42,6 +43,7 @@ export function ReportList({ reports }: { reports: AdminReportListItem[] }) {
               <th scope="col" className="px-4 py-3 font-semibold">Urgency</th>
               <th scope="col" className="px-4 py-3 font-semibold">Status</th>
               <th scope="col" className="px-4 py-3 font-semibold">Submitted</th>
+              <th scope="col" className="px-4 py-3 text-right font-semibold">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -61,6 +63,14 @@ export function ReportList({ reports }: { reports: AdminReportListItem[] }) {
                 <td className="px-4 py-3"><StatusBadge status={report.status} /></td>
                 <td className="whitespace-nowrap px-4 py-3 text-text-secondary">
                   {formatDateTime(report.createdAt)}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-right">
+                  <Link
+                    href={`/admin/reports/${report.id}`}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                  >
+                    Review & Update
+                  </Link>
                 </td>
               </tr>
             ))}

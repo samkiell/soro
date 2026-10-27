@@ -5,20 +5,23 @@ import { isUniqueConstraintError } from "./errors";
 
 export type RegisterStudentResult =
   | { ok: true; userId: string }
-  | { ok: false; reason: "EMAIL_TAKEN" };
+  | { ok: false; reason: "EMAIL_TAKEN" | "MATRIC_TAKEN" };
 
 /** Creates a STUDENT account. The role is never taken from user input. */
 export async function registerStudent(input: {
   name: string;
+  matricNumber: string;
   email: string;
   password: string;
 }): Promise<RegisterStudentResult> {
   const passwordHash = await hashPassword(input.password);
+  const normalizedMatric = input.matricNumber.trim().toUpperCase();
   try {
     const user = await prisma.user.create({
       data: {
         name: input.name,
-        email: input.email,
+        matricNumber: normalizedMatric,
+        email: input.email.trim().toLowerCase(),
         passwordHash,
         role: "STUDENT",
       },
@@ -26,7 +29,13 @@ export async function registerStudent(input: {
     });
     return { ok: true, userId: user.id };
   } catch (error) {
-    if (isUniqueConstraintError(error)) return { ok: false, reason: "EMAIL_TAKEN" };
+    if (isUniqueConstraintError(error)) {
+      const errStr = String(error);
+      if (errStr.includes("matricNumber")) {
+        return { ok: false, reason: "MATRIC_TAKEN" };
+      }
+      return { ok: false, reason: "EMAIL_TAKEN" };
+    }
     throw error;
   }
 }

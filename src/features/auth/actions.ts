@@ -14,12 +14,12 @@ import { findRoleByEmail, registerStudent } from "@/server/services/auth-service
 import type { AuthActionResult } from "@/types";
 
 async function startSession(
-  email: string,
+  identifier: string,
   password: string,
   callbackUrl: string | undefined,
 ): Promise<AuthActionResult> {
   try {
-    await signIn("credentials", { email, password, redirect: false });
+    await signIn("credentials", { identifier, password, redirect: false });
   } catch (error) {
     if (error instanceof AuthError && error.type === "CredentialsSignin") {
       // Same message whether the email or the password is wrong.
@@ -29,7 +29,10 @@ async function startSession(
     return { success: false, error: "INTERNAL_ERROR" };
   }
 
-  const role = (await findRoleByEmail(email)) ?? "STUDENT";
+  // Look up user role by identifier (email or matric)
+  const norm = identifier.trim().toLowerCase();
+  const user = await findRoleByEmail(norm);
+  const role = user ?? "STUDENT";
   return {
     success: true,
     redirectTo: safeCallbackPath(callbackUrl, defaultPathForRole(role)),
@@ -48,7 +51,7 @@ export async function signInWithCredentials(
       fieldErrors: toFieldErrors(parsed.error),
     };
   }
-  return startSession(parsed.data.email, parsed.data.password, callbackUrl);
+  return startSession(parsed.data.identifier, parsed.data.password, callbackUrl);
 }
 
 export async function registerAccount(
