@@ -280,11 +280,11 @@ async function ReportDetailContent({ params }: { params: Params }) {
             <div className="flex items-center gap-2">
               <WarningTriangle className="h-5 w-5 text-brand" aria-hidden="true" />
               <h3 id="emergency-card-heading" className="font-bold text-ink">
-                Has the situation escalated?
+                Active Fire or Structural Hazard?
               </h3>
             </div>
             <p className="text-xs leading-relaxed text-text-secondary">
-              If anyone is in immediate physical danger or requires fire/medical response, call the campus fire service immediately.
+              If this incident involves an active fire, smoke outbreak, or structural rescue, contact the <strong>OAU Campus Fire Service</strong> directly (hotline is strictly for fire/rescue). For medical or security response, consult the emergency guide.
             </p>
             <a
               href="tel:08162214241"
@@ -294,7 +294,7 @@ async function ReportDetailContent({ params }: { params: Params }) {
               )}
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
-              Call 08162214241
+              Call Fire Service (08162214241)
             </a>
             <Link
               href="/emergency"

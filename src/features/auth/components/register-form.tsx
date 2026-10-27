@@ -145,7 +145,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
             {...control}
             {...register("matricNumber")}
             autoComplete="off"
-            placeholder="e.g. SWE/2023/072 or swe2023072"
+            placeholder="e.g. 2023/001"
             className="uppercase font-mono text-sm"
           />
         )}
@@ -155,7 +155,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
         id="email"
         label="OAU Student Email"
         required
-        hint="Only official OAU student email addresses are allowed (e.g. e.samuel.swe2023072@student.oauife.edu.ng)."
+        hint="Only official OAU student email addresses are allowed (e.g. j.doe2023001@student.oauife.edu.ng)."
         error={errors.email?.message}
       >
         {(control) => (
@@ -166,7 +166,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
               type="email"
               autoComplete="email"
               inputMode="email"
-              placeholder="e.samuel.swe2023072"
+              placeholder="j.doe2023001"
               className="rounded-r-none border-r-0"
             />
             <span className="inline-flex select-none items-center rounded-r-lg border border-border bg-warm-cream/70 px-3 text-xs font-semibold text-text-secondary sm:text-xs">

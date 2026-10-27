@@ -77,11 +77,16 @@ async function DashboardContent() {
             aria-hidden="true"
           />
           <div className="text-sm">
-            <strong className="font-semibold text-ink">
-              Is this an ongoing, urgent emergency?
-            </strong>
-            <p className="text-text-secondary">
-              Soro reports are reviewed by campus staff. For immediate dispatch or fire emergencies, dial the fire service directly.
+            <div className="flex flex-wrap items-center gap-2">
+              <strong className="font-semibold text-ink">
+                OAU Campus Fire Service
+              </strong>
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900 border border-amber-300">
+                Fire & Rescue Only
+              </span>
+            </div>
+            <p className="text-text-secondary mt-0.5">
+              08162214241 is strictly for active fires or rescue hazards (not general emergency dispatch). For security or medical help, view directory.
             </p>
           </div>
         </div>
@@ -90,11 +95,11 @@ async function DashboardContent() {
             href="tel:08162214241"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "border-brand/30 bg-white font-semibold text-brand hover:bg-white/90",
+              "border-danger/30 bg-white font-semibold text-danger hover:bg-red-50",
             )}
           >
             <PhoneCall className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-            08162214241
+            Fire Service: 08162214241
           </a>
           <Link
             href="/emergency"
@@ -103,7 +108,7 @@ async function DashboardContent() {
               "text-xs font-semibold text-brand underline-offset-4 hover:underline",
             )}
           >
-            Emergency info
+            Emergency directory
           </Link>
         </div>
       </aside>

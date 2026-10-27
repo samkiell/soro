@@ -118,13 +118,16 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-[11px] text-purple-200">Immediate emergency?</span>
+                <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <span className="text-[11px] font-semibold text-purple-200 block">Active fire or rescue hazard?</span>
+                    <span className="text-[10px] text-amber-300 font-medium">OAU Fire Service only (not general emergency)</span>
+                  </div>
                   <a
                     href="tel:08162214241"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-danger px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-800 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-danger px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-800 transition-colors shrink-0"
                   >
-                    <PhoneCall className="h-3 w-3" /> Call 08162214241
+                    <PhoneCall className="h-3 w-3" /> Call Fire Service (08162214241)
                   </a>
                 </div>
               </div>
@@ -304,9 +307,14 @@ export default function HomePage() {
                 <PhoneCall className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-danger">Experiencing an active campus emergency?</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-lg font-bold text-danger">Active Fire or Immediate Rescue Emergency?</h3>
+                  <span className="rounded bg-danger/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-danger border border-danger/20">
+                    Fire Service Only
+                  </span>
+                </div>
                 <p className="mt-1 text-sm text-text-secondary max-w-xl">
-                  Do not wait for a ticket review. Submitting an online report does not automatically dispatch immediate rescue teams. Call campus responders directly.
+                  <strong>Notice:</strong> 08162214241 is the direct hotline <strong className="text-danger font-semibold">strictly for the OAU Campus Fire Service</strong> (active fires, smoke, gas leaks, and physical rescues). It is <em>not</em> a general campus emergency dispatch. For health or security incidents, consult the emergency directory.
                 </p>
               </div>
             </div>
@@ -314,9 +322,9 @@ export default function HomePage() {
             <div className="flex w-full flex-col gap-2 sm:w-auto">
               <a
                 href="tel:08162214241"
-                className="flex items-center justify-center gap-2 rounded-md bg-danger px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-800"
+                className="flex items-center justify-center gap-2 rounded-md bg-danger px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-800 text-center"
               >
-                <PhoneCall className="h-4 w-4" /> Call 08162214241
+                <PhoneCall className="h-4 w-4" /> Call Fire Service (08162214241)
               </a>
               <Link
                 href="/emergency"

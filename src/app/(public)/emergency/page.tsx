@@ -39,14 +39,23 @@ export default function EmergencyPage() {
         aria-labelledby="fire-service-heading"
         className="rounded-lg border border-border bg-surface p-5 shadow-xs sm:p-6"
       >
-        <h2
-          id="fire-service-heading"
-          className="text-sm font-semibold uppercase tracking-wide text-text-secondary"
-        >
-          {FIRE_SERVICE.name}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2
+            id="fire-service-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-text-secondary"
+          >
+            {FIRE_SERVICE.name}
+          </h2>
+          <span className="rounded bg-danger/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-danger border border-danger/20">
+            Fire & Rescue Only
+          </span>
+        </div>
         <p className="mt-2 select-all text-3xl font-bold tabular-nums tracking-tight text-ink sm:text-4xl">
           {FIRE_SERVICE.display}
+        </p>
+
+        <p className="mt-2 text-xs font-medium text-amber-900 bg-amber-50 rounded border border-amber-200 p-2.5">
+          <strong>Notice:</strong> This direct hotline connects strictly to the <strong>OAU Campus Fire Service</strong> for active fire outbreaks, smoke hazards, gas leaks, and physical/structural rescues. It is <em>not</em> a general dispatch for security or health center incidents.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:items-start">
