@@ -178,6 +178,10 @@ function AdminReportDetailsContent() {
 
  
   function saveStatus() {
+    if (!report) {
+  setMessage("Report not found.");
+  return;
+}
     if (!storageReady) {
       setMessage("Please wait for the saved report data to load.");
       return;
@@ -202,6 +206,10 @@ function AdminReportDetailsContent() {
   }
 
   function addNote() {
+    if (!report) {
+  setMessage("Report not found.");
+  return;
+}
     const trimmedNote = note.trim();
 
     if (!trimmedNote) {
