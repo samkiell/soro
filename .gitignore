@@ -46,3 +46,6 @@ next-env.d.ts
 
 # local storage uploads
 /.storage/
+
+# agent rules and local ide config
+.agents/

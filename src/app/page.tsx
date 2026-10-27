@@ -16,25 +16,40 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-warm-cream py-12 sm:py-16 lg:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section className="relative overflow-hidden py-16 sm:py-20 lg:py-28">
+        {/* Full-bleed background image with responsive coverage */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/oau-senate-bg.jpg"
+            alt="Obafemi Awolowo University Campus Senate Building"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          {/* Multi-layer gradient overlays ensuring high text contrast and school brand aesthetics */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brand/95 via-brand/85 to-brand/60" />
+          <div className="absolute inset-0 bg-black/30" />
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
             {/* Left Content Column */}
             <div className="flex flex-col items-start lg:col-span-7">
               {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-white/80 px-3.5 py-1 text-xs font-semibold text-ink shadow-2xs">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-brand/60 px-3.5 py-1 text-xs font-semibold text-gold shadow-sm backdrop-blur-md">
                 <Shield className="h-3.5 w-3.5 text-gold fill-gold/30" />
                 <span>Your safety. Our priority.</span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-brand sm:text-5xl lg:text-6xl">
+              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Report it.
                 <span className="block text-gold">We&apos;ll handle it.</span>
               </h1>
 
               {/* Subtext */}
-              <p className="mt-5 max-w-xl text-base text-text-secondary sm:text-lg leading-relaxed">
+              <p className="mt-5 max-w-xl text-base text-purple-100 sm:text-lg leading-relaxed">
                 Soro makes it easy to report incidents on campus and get the help you need — fast.
               </p>
 
@@ -43,7 +58,7 @@ export default function HomePage() {
                 <Link href="/report/new" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="w-full bg-brand text-white hover:bg-brand-hover shadow-sm sm:w-auto"
+                    className="w-full bg-gold text-ink font-bold hover:bg-gold-hover shadow-md sm:w-auto"
                   >
                     Report an Incident
                   </Button>
@@ -52,7 +67,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full border-border bg-white text-ink hover:bg-surface-muted shadow-xs sm:w-auto"
+                    className="w-full border-white/40 bg-white/10 text-white font-medium hover:bg-white/20 backdrop-blur-md shadow-xs sm:w-auto"
                   >
                     View Emergency Contacts
                   </Button>
@@ -60,37 +75,57 @@ export default function HomePage() {
               </div>
 
               {/* Privacy Indicator */}
-              <div className="mt-6 flex items-center gap-2 text-xs text-text-secondary">
+              <div className="mt-6 flex items-center gap-2 text-xs text-purple-200">
                 <Lock className="h-3.5 w-3.5 text-gold" />
                 <span>End-to-end privacy. Anonymous reporting option supported.</span>
               </div>
             </div>
 
-            {/* Right Visual Column: OAU Senate Building & Landmark Hero Image */}
+            {/* Right Column: Glassmorphic Campus Safety Live Card */}
             <div className="flex justify-center lg:col-span-5">
-              <div className="relative w-full max-w-md">
-                {/* Decorative background aura */}
-                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-gold/20 to-brand/15 blur-xl"></div>
+              <div className="w-full max-w-md rounded-2xl border border-white/20 bg-brand/50 p-6 shadow-2xl backdrop-blur-md">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/20 text-gold border border-gold/40">
+                      <Shield className="h-5 w-5 text-gold" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-gold">Great Ife</p>
+                      <p className="text-sm font-semibold text-white">Campus Safety System</p>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live 24/7
+                  </span>
+                </div>
 
-                <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-white/80 p-3 shadow-md backdrop-blur-xs">
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-warm-cream shadow-inner">
-                    <Image
-                      src="/download (7).jpeg"
-                      alt="Obafemi Awolowo University Campus Senate Building"
-                      fill
-                      priority
-                      className="object-cover transition-transform duration-300 hover:scale-[1.02]"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
-                    />
+                <div className="mt-5 space-y-3.5 text-xs text-purple-100">
+                  <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3 border border-white/5">
+                    <Clock className="h-4 w-4 shrink-0 text-gold mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-white">Rapid Response Protocol</p>
+                      <p className="mt-0.5 text-purple-200">Security personnel review submissions and coordinate direct response.</p>
+                    </div>
                   </div>
-                  <div className="mt-3 flex items-center justify-between px-1.5 pb-0.5">
-                    <span className="text-xs font-bold tracking-wider text-brand uppercase">
-                      Great Ife · OAU Campus
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-gold border border-amber-200/70">
-                      Iconic Landmark
-                    </span>
+
+                  <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3 border border-white/5">
+                    <EyeOff className="h-4 w-4 shrink-0 text-gold mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-white">Confidential & Anonymous</p>
+                      <p className="mt-0.5 text-purple-200">Submit sensitive reports with reporter identity protected.</p>
+                    </div>
                   </div>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] text-purple-200">Immediate emergency?</span>
+                  <a
+                    href="tel:08162214241"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-danger px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-800 transition-colors"
+                  >
+                    <PhoneCall className="h-3 w-3" /> Call 08162214241
+                  </a>
                 </div>
               </div>
             </div>
