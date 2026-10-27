@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/lib/auth";
 import { defaultPathForRole, safeCallbackPath } from "@/lib/safe-redirect";
@@ -10,7 +11,7 @@ import {
   type RegisterInput,
   type SignInInput,
 } from "@/lib/validation/auth";
-import { findRoleByEmail, registerStudent } from "@/server/services/auth-service";
+import { findRoleByIdentifier, registerStudent } from "@/server/services/auth-service";
 import type { AuthActionResult } from "@/types";
 
 async function startSession(
@@ -30,8 +31,7 @@ async function startSession(
   }
 
   // Look up user role by identifier (email or matric)
-  const norm = identifier.trim().toLowerCase();
-  const user = await findRoleByEmail(norm);
+  const user = await findRoleByIdentifier(identifier);
   const role = user ?? "STUDENT";
   return {
     success: true,
@@ -80,5 +80,6 @@ export async function registerAccount(
 }
 
 export async function signOutAction(): Promise<void> {
-  await signOut({ redirectTo: "/" });
+  await signOut({ redirect: false });
+  redirect("/");
 }

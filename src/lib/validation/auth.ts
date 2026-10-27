@@ -31,7 +31,7 @@ export const matricNumberField = z
   .string()
   .trim()
   .toUpperCase()
-  .min(4, "Enter your student matric number (e.g. 2023/001).")
+  .min(4, "Enter your student matric number (e.g. swe/2023/001).")
   .max(25, "Matric number must be 25 characters or fewer.")
   .regex(/^[A-Z0-9/_-]+$/, "Matric number can only contain letters, numbers, and slashes.");
 

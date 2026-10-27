@@ -6,6 +6,7 @@ import { signInSchema } from "@/lib/validation/auth";
 import { verifyPassword } from "./password";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   // Credentials sign-in requires JWT sessions. The token carries only the user id;
   // the role is re-read from the database on every request (see lib/permissions).
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 },

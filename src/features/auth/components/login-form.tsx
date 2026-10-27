@@ -86,7 +86,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         id="identifier"
         label="Matric Number or OAU Email"
         required
-        hint="Sign in using either your matric number (e.g. SWE/2023/072) or your official OAU student email."
+        hint="Sign in using either your matric number (e.g. swe/2023/001) or your official OAU student email."
         error={errors.identifier?.message}
       >
         {(control) => (
@@ -96,7 +96,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
               {...register("identifier")}
               type="text"
               autoComplete="username"
-              placeholder="e.g. 2023/001 or j.doe2023001"
+              placeholder="e.g. swe/2023/001 or e.samuel.swe2023072@student.oauife.edu.ng"
               className="pr-4"
             />
           </div>

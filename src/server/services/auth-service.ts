@@ -40,10 +40,22 @@ export async function registerStudent(input: {
   }
 }
 
-export async function findRoleByEmail(email: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
+export async function findRoleByIdentifier(identifier: string) {
+  const raw = identifier.trim().toLowerCase();
+  const normalizedMatric = identifier.trim().toUpperCase();
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: raw },
+        { email: `${raw}@student.oauife.edu.ng` },
+        { matricNumber: normalizedMatric },
+        { matricNumber: { equals: identifier.trim(), mode: "insensitive" } },
+      ],
+    },
     select: { role: true },
   });
   return user?.role ?? null;
 }
+
+export const findRoleByEmail = findRoleByIdentifier;
+

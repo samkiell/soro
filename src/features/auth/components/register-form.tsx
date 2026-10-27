@@ -145,7 +145,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
             {...control}
             {...register("matricNumber")}
             autoComplete="off"
-            placeholder="e.g. 2023/001"
+            placeholder="e.g. swe/2023/001"
             className="uppercase font-mono text-sm"
           />
         )}
@@ -162,11 +162,16 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
           <div className="flex items-stretch rounded-lg shadow-2xs">
             <Input
               {...control}
-              {...register("email")}
-              type="email"
+              {...register("email", {
+                setValueAs: (v: string) => {
+                  const trimmed = (v ?? "").trim().toLowerCase();
+                  if (!trimmed) return "";
+                  return trimmed.includes("@") ? trimmed : `${trimmed}${OAU_STUDENT_DOMAIN}`;
+                },
+              })}
+              type="text"
               autoComplete="email"
-              inputMode="email"
-              placeholder="j.doe2023001"
+              placeholder="e.samuel.swe2023072"
               className="rounded-r-none border-r-0"
             />
             <span className="inline-flex select-none items-center rounded-r-lg border border-border bg-warm-cream/70 px-3 text-xs font-semibold text-text-secondary sm:text-xs">
