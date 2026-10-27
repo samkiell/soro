@@ -1,14 +1,113 @@
-// This is your Prisma schema file for Soro.
-// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for Soro.
+// Field names and enum values follow docs/REPORT_API_CONTRACT.md. Keep them in sync.
+// Connection URLs live in prisma.config.ts (CLI) and src/lib/db/prisma.ts (runtime).
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
-// Issue #2 will implement the User, Report, and Audit models.
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum IncidentType {
+  SAFETY
+  THEFT
+  HARASSMENT
+  MEDICAL
+  FIRE
+  SUSPICIOUS_ACTIVITY
+  FACILITY
+  OTHER
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ReportStatus {
+  RECEIVED
+  IN_PROGRESS
+  RESOLVED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  /// Stored lowercased and trimmed.
+  email        String   @unique
+  passwordHash String
+  /// Registration always creates STUDENT. ADMIN is granted only via the seed script.
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reports       Report[]
+  statusChanges ReportStatusHistory[]
+  notes         ReportNote[]
+}
+
+model Report {
+  id           String       @id @default(cuid())
+  /// Kept for anonymous reports too, so the student can track them. Never shown in admin
+  /// or other student views when isAnonymous is true.
+  reporterId   String
+  reporter     User         @relation(fields: [reporterId], references: [id], onDelete: Restrict)
+  title        String
+  description  String
+  location     String
+  incidentType IncidentType
+  urgency      Urgency
+  isAnonymous  Boolean      @default(false)
+  /// Object key in the private Neon Object Storage bucket "assets". Never a public URL.
+  photoKey     String?      @unique
+  status       ReportStatus @default(RECEIVED)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  statusHistory ReportStatusHistory[]
+  notes         ReportNote[]
+
+  @@index([reporterId, createdAt])
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+/// Append-only, student-visible record of status changes.
+model ReportStatusHistory {
+  id          String        @id @default(cuid())
+  reportId    String
+  report      Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  /// Null for the initial RECEIVED entry created with the report.
+  fromStatus  ReportStatus?
+  toStatus    ReportStatus
+  /// The admin who made the change. Null for the initial entry so an anonymous
+  /// reporter is never recorded as an actor.
+  changedById String?
+  changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+
+  @@index([reportId, createdAt])
+}
+
+/// Internal staff notes. Admin-only; never returned to students.
+model ReportNote {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([reportId, createdAt])
+}

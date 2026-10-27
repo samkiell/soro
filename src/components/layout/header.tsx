@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { signOutAction } from "@/features/auth/actions";
+import { getCurrentUser } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   return (
@@ -55,28 +59,68 @@ export function Header() {
         </nav>
 
         {/* Right Action Buttons */}
-        <div className="flex items-center gap-2.5">
-          <Link href="/login">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-border bg-white text-ink hover:bg-surface-muted font-medium"
-            >
-              Login
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-gold text-ink hover:bg-gold-hover font-semibold shadow-2xs"
-            >
-              Register
-            </Button>
-          </Link>
-        </div>
+        {/* Reads the session, so it streams in behind a boundary. */}
+        <Suspense fallback={<div className="h-9 w-40" aria-hidden="true" />}>
+          <HeaderActions />
+        </Suspense>
       </div>
     </header>
+  );
+}
+
+async function HeaderActions() {
+  const user = await getCurrentUser().catch(() => null);
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2.5">
+        <Link
+          href="/login"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "border-border bg-white text-ink hover:bg-surface-muted font-medium",
+          )}
+        >
+          Login
+        </Link>
+        <Link
+          href="/register"
+          className={cn(
+            buttonVariants({ variant: "secondary", size: "sm" }),
+            "bg-gold text-ink hover:bg-gold-hover font-semibold shadow-2xs",
+          )}
+        >
+          Register
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2.5">
+      {user.role === "ADMIN" ? (
+        <Link href="/admin" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          Admin
+        </Link>
+      ) : (
+        <>
+          <Link href="/dashboard" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            Dashboard
+          </Link>
+          <Link href="/report/new" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            New report
+          </Link>
+        </>
+      )}
+      <span className="hidden max-w-[10rem] truncate text-sm text-text-secondary md:inline">
+        {user.name}
+      </span>
+      <form action={signOutAction}>
+        <Button type="submit" variant="outline" size="sm">
+          Sign out
+        </Button>
+      </form>
+    </div>
   );
 }
 

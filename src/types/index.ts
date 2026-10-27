@@ -1,34 +1,76 @@
-export type Role = "USER" | "ADMIN";
+// Shared, client-safe types. Report types follow docs/REPORT_API_CONTRACT.md exactly.
+import type {
+  IncidentType,
+  ReportStatus,
+  Role,
+  Urgency,
+} from "@/generated/prisma/enums";
 
-export type ReportUrgency = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type { IncidentType, ReportStatus, Role, Urgency };
 
-export type ReportStatus = "RECEIVED" | "IN_PROGRESS" | "RESOLVED";
-
-export type IncidentCategory =
-  | "THEFT"
-  | "HARASSMENT"
-  | "PHYSICAL_ASSAULT"
-  | "HAZARD"
-  | "MEDICAL_EMERGENCY"
-  | "OTHER";
-
-export interface UserSummary {
-  id: string;
-  name: string | null;
-  email: string;
-  role: Role;
-}
-
-export interface ReportItem {
-  id: string;
+export type CreateReportInput = {
   title: string;
   description: string;
-  category: IncidentCategory;
-  urgency: ReportUrgency;
-  status: ReportStatus;
   location: string;
+  incidentType: IncidentType;
+  urgency: Urgency;
   isAnonymous: boolean;
-  photoUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+  photoKey?: string;
+};
+
+export type CreateReportError =
+  | "UNAUTHENTICATED"
+  | "VALIDATION_ERROR"
+  | "UPLOAD_NOT_FOUND"
+  | "FORBIDDEN"
+  | "INTERNAL_ERROR";
+
+export type CreateReportResult =
+  | {
+      success: true;
+      report: { id: string; status: ReportStatus; createdAt: string };
+    }
+  | {
+      success: false;
+      error: CreateReportError;
+      fieldErrors?: Record<string, string[]>;
+    };
+
+export type UploadPhotoError =
+  | "UNAUTHENTICATED"
+  | "FORBIDDEN"
+  | "INVALID_REQUEST"
+  | "FILE_TOO_LARGE"
+  | "UNSUPPORTED_FILE_TYPE"
+  | "STORAGE_UNAVAILABLE"
+  | "UPLOAD_FAILED";
+
+export type UploadPhotoResult =
+  | { success: true; photoKey: string }
+  | { success: false; error: UploadPhotoError };
+
+export type ActionFailure<TError extends string> = {
+  success: false;
+  error: TError;
+  fieldErrors?: Record<string, string[]>;
+};
+
+export type AuthActionResult =
+  | { success: true; redirectTo: string }
+  | ActionFailure<
+      | "VALIDATION_ERROR"
+      | "INVALID_CREDENTIALS"
+      | "ACCOUNT_UNAVAILABLE"
+      | "INTERNAL_ERROR"
+    >;
+
+export type AdminActionError =
+  | "UNAUTHENTICATED"
+  | "FORBIDDEN"
+  | "VALIDATION_ERROR"
+  | "NOT_FOUND"
+  | "INVALID_TRANSITION"
+  | "CONFLICT"
+  | "INTERNAL_ERROR";
+
+export type AdminActionResult = { success: true } | ActionFailure<AdminActionError>;

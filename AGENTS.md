@@ -25,3 +25,13 @@ Before coding, read `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DE
 Run relevant lint, type-check, tests, Prisma checks, and build where practical. Report only checks actually run and explain anything skipped. Review the diff for unrelated changes and secrets. The PR description must summarize changes, link the issue, list test outcomes, give manual verification steps, and state known limitations.
 
 Do not run destructive operations, change production data, rewrite shared history, merge, or deploy without explicit authorization. Ask when requirements materially conflict or remain ambiguous.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

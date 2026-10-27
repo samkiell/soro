@@ -1,467 +1,183 @@
-
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
-type ReportStatus =
-  | "Pending"
-  | "Investigating"
-  | "Resolved"
-  | "Rejected";
+import { notFound } from "next/navigation";
+import { Suspense, type ReactNode } from "react";
+import { ArrowLeft, EyeOff, Lock } from "lucide-react";
+import { StatusBadge, UrgencyBadge } from "@/components/reports/report-badges";
+import { NoteForm } from "@/features/admin/components/note-form";
+import { ReportPhoto } from "@/features/admin/components/report-photo";
+import { StatusUpdateForm } from "@/features/admin/components/status-update-form";
+import { INCIDENT_TYPE_LABELS, STATUS_LABELS } from "@/features/reports/labels";
+import { formatDateTime, reportReference } from "@/lib/format";
+import { requireAdmin } from "@/lib/permissions";
+import {
+  getReportForAdmin,
+  type AdminReportDetail,
+} from "@/server/services/admin-report-service";
 
-type Report = {
-  id: string;
-  title: string;
-  location: string;
-  date: string;
-  priority: "High" | "Medium" | "Low";
-  status: ReportStatus;
-  description: string;
-  reporter: string;
-};
+export const metadata: Metadata = { title: "Report review · Soro admin" };
 
-const sampleReports: Report[] = [
-  {
-    id: "SORO-001",
-    title: "Suspicious activity near lecture hall",
-    location: "Lecture Hall",
-    date: "October 23, 2026",
-    priority: "High",
-    status: "Pending",
-    description:
-      "A suspicious activity was reported near the lecture hall. The incident requires review by the campus safety team.",
-    reporter: "Sample Reporter 1",
-  },
-  {
-    id: "SORO-002",
-    title: "Lost student identification card",
-    location: "Faculty Building",
-    date: "October 22, 2026",
-    priority: "Medium",
-    status: "Investigating",
-    description:
-      "A student reported a missing identification card around the faculty building.",
-    reporter: "Sample Reporter 2",
-  },
-  {
-    id: "SORO-003",
-    title: "Damaged campus streetlight",
-    location: "Main Campus Road",
-    date: "October 21, 2026",
-    priority: "Low",
-    status: "Resolved",
-    description:
-      "A damaged streetlight was reported along the main campus road.",
-    reporter: "Sample Reporter 3",
-  },
-  {
-    id: "SORO-004",
-    title: "Reported theft near hostel",
-    location: "Student Hostel",
-    date: "October 20, 2026",
-    priority: "High",
-    status: "Pending",
-    description:
-      "A theft incident was reported near a student hostel. The report needs to be reviewed.",
-    reporter: "Sample Reporter 4",
-  },
-  {
-    id: "SORO-005",
-    title: "Damaged classroom door",
-    location: "Science Faculty",
-    date: "October 19, 2026",
-    priority: "Low",
-    status: "Rejected",
-    description:
-      "This sample report could not be verified.",
-    reporter: "Sample Reporter 5",
-  },
-];
+type Params = Promise<{ id: string }>;
 
-function statusStyle(status: ReportStatus) {
-  switch (status) {
-    case "Pending":
-      return "bg-amber-100 text-amber-800";
-    case "Investigating":
-      return "bg-blue-100 text-blue-800";
-    case "Resolved":
-      return "bg-green-100 text-green-800";
-    case "Rejected":
-      return "bg-red-100 text-red-800";
-  }
-}
-
-function AdminReportDetailsContent() {
-  const params = useParams<{ id: string }>();
-  const reportId = decodeURIComponent(params.id);
-
- const [report, setReport] = useState<Report | undefined>(
-  sampleReports.find((item) => item.id === reportId)
-);
- 
-  const [status, setStatus] = useState<ReportStatus>(
-    report?.status ?? "Pending"
+export default function AdminReportPage({ params }: { params: Params }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <Link
+        href="/admin/reports"
+        className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-brand underline-offset-4 hover:underline"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> All reports
+      </Link>
+      <Suspense fallback={<DetailSkeleton />}>
+        <ReportReview params={params} />
+      </Suspense>
+    </div>
   );
-
-  const [note, setNote] = useState("");
-  const [savedNotes, setSavedNotes] = useState<string[]>([]);
-  const [message, setMessage] = useState("");
-  const [storageReady, setStorageReady] = useState(false);
-
- useEffect(() => {
-  try {
-    const submittedReports = JSON.parse(
-      localStorage.getItem("soro-submitted-reports") || "[]"
-    ) as Report[];
-
-    const allReports = [
-      ...sampleReports,
-      ...submittedReports.map((item) => ({
-        ...item,
-        description:
-          item.description || "No additional description provided.",
-        reporter: item.reporter || "Not provided",
-      })),
-    ];
-
-    const foundReport = allReports.find(
-      (item) => item.id === reportId
-    );
-
-    setReport(foundReport);
-
-    if (!foundReport) {
-      setStorageReady(true);
-      return;
-    }
-
-    const savedStatuses = JSON.parse(
-      localStorage.getItem("soro-report-statuses") || "{}"
-    ) as Record<string, ReportStatus>;
-
-    const savedNotesByReport = JSON.parse(
-      localStorage.getItem("soro-report-notes") || "{}"
-    ) as Record<string, string[]>;
-
-    setStatus(savedStatuses[foundReport.id] ?? foundReport.status);
-    setSavedNotes(savedNotesByReport[foundReport.id] ?? []);
-    setStorageReady(true);
-  } catch {
-    setMessage("Could not load saved report details.");
-    setStorageReady(true);
-  }
-}, [reportId]);
-
-  if (!report) {
-    return (
-      <main className="min-h-screen bg-slate-50 p-6 text-slate-900">
-        <div className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-8">
-          <h1 className="text-2xl font-bold">
-            Report not found
-          </h1>
-
-          <p className="mt-3 text-slate-600">
-            This ID does not match any report in the current sample data.
-          </p>
-
-          <Link
-            href="/admin/reports"
-            className="mt-6 inline-block font-semibold text-blue-700 hover:underline"
-          >
-            ← Back to reports
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
- 
-  function saveStatus() {
-    if (!report) {
-  setMessage("Report not found.");
-  return;
 }
-    if (!storageReady) {
-      setMessage("Please wait for the saved report data to load.");
-      return;
-    }
 
-    try {
-      const savedStatuses = JSON.parse(
-        localStorage.getItem("soro-report-statuses") || "{}"
-      );
-
-      savedStatuses[report.id] = status;
-
-      localStorage.setItem(
-        "soro-report-statuses",
-        JSON.stringify(savedStatuses)
-      );
-
-      setMessage(`Status saved as "${status}" in this browser.`);
-    } catch {
-      setMessage("Unable to save the status in this browser.");
-    }
-  }
-
-  function addNote() {
-    if (!report) {
-  setMessage("Report not found.");
-  return;
+function Section({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-border bg-white p-5">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold text-ink">{title}</h2>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
 }
-    const trimmedNote = note.trim();
 
-    if (!trimmedNote) {
-      setMessage("Please enter a note before adding it.");
-      return;
-    }
-
-    if (!storageReady) {
-      setMessage("Please wait for the saved report data to load.");
-      return;
-    }
-
-    try {
-      const savedNotesByReport = JSON.parse(
-        localStorage.getItem("soro-report-notes") || "{}"
-      );
-
-      const updatedNotes = [
-        ...(savedNotesByReport[report.id] ?? []),
-        trimmedNote,
-      ];
-
-      savedNotesByReport[report.id] = updatedNotes;
-
-      localStorage.setItem(
-        "soro-report-notes",
-        JSON.stringify(savedNotesByReport)
-      );
-
-      setSavedNotes(updatedNotes);
-      setNote("");
-      setMessage("Internal note saved in this browser.");
-    } catch {
-      setMessage("Unable to save the note in this browser.");
-    }
-  }
+async function ReportReview({ params }: { params: Params }) {
+  const { id } = await params;
+  const admin = await requireAdmin(`/admin/reports/${id}`);
+  const report = await getReportForAdmin(admin, id);
+  if (!report) notFound();
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 text-slate-900 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header>
-          <Link
-            href="/admin/reports"
-            className="text-sm font-semibold text-blue-700 hover:underline"
-          >
-            ← Back to all reports
-          </Link>
-
-          <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-sm font-semibold text-blue-700">
-                REPORT DETAILS
-              </p>
-
-              <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
-                {report.title}
-              </h1>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Reference: {report.id}
-              </p>
-            </div>
-
-            <span
-              className={`w-fit rounded-full px-4 py-2 text-sm font-semibold ${statusStyle(status)}`}
-            >
-              {status}
-            </span>
-          </div>
-        </header>
-
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <strong>Preview mode:</strong> This is sample information.
-          Status changes and notes are temporary and will not persist
-          after the page is refreshed.
+    <>
+      <header className="flex flex-col gap-3">
+        <p className="font-mono text-xs font-semibold text-text-muted">
+          Ref {reportReference(report.id)}
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{report.title}</h1>
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge status={report.status} />
+          <UrgencyBadge urgency={report.urgency} />
         </div>
+      </header>
 
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <article className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
-            <h2 className="text-lg font-bold">
-              Incident Information
-            </h2>
-
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div>
-                <p className="text-sm text-slate-500">
-                  Incident location
-                </p>
-                <p className="mt-1 font-semibold">
-                  {report.location}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Date reported
-                </p>
-                <p className="mt-1 font-semibold">
-                  {report.date}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Priority
-                </p>
-                <p
-                  className={`mt-1 font-semibold ${
-                    report.priority === "High"
-                      ? "text-red-700"
-                      : report.priority === "Medium"
-                        ? "text-amber-700"
-                        : "text-green-700"
-                  }`}
-                >
-                  {report.priority}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-slate-500">
-                  Reporter
-                </p>
-                <p className="mt-1 font-semibold">
-                  {report.reporter}
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-100 pt-5">
-              <h3 className="font-semibold">
-                Incident Description
-              </h3>
-
-              <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-600">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex flex-col gap-6">
+          <Section title="Details">
+            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[auto_1fr]">
+              <dt className="font-medium text-text-secondary">Incident type</dt>
+              <dd className="text-ink">{INCIDENT_TYPE_LABELS[report.incidentType]}</dd>
+              <dt className="font-medium text-text-secondary">Location</dt>
+              <dd className="text-ink">{report.location}</dd>
+              <dt className="font-medium text-text-secondary">Submitted</dt>
+              <dd className="text-ink">{formatDateTime(report.createdAt)}</dd>
+              <dt className="font-medium text-text-secondary">Reporter</dt>
+              <dd className="text-ink">
+                <Reporter report={report} />
+              </dd>
+            </dl>
+            <div className="flex flex-col gap-1.5 border-t border-border pt-3">
+              <h3 className="text-sm font-medium text-text-secondary">Description</h3>
+              <p className="whitespace-pre-wrap break-words text-base leading-relaxed text-ink">
                 {report.description}
               </p>
             </div>
-          </article>
+          </Section>
 
-          <aside className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-bold">
-              Manage Report
-            </h2>
+          <Section title="Photo">
+            {report.hasPhoto ? (
+              <ReportPhoto reportId={report.id} />
+            ) : (
+              <p className="text-sm text-text-secondary">No photo was attached.</p>
+            )}
+          </Section>
 
-            <div>
-              <label
-                htmlFor="report-status"
-                className="mb-2 block text-sm font-semibold"
-              >
-                Update status
-              </label>
-
-              <select
-                id="report-status"
-                value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value as ReportStatus);
-                  setMessage("");
-                }}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Investigating">Investigating</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={saveStatus}
-              className="w-full rounded-lg bg-blue-700 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-            >
-             Save Status
-            </button>
-
-            <p className="text-xs leading-5 text-slate-500">
-              Database saving will be connected when the backend
-              endpoint is ready.
-            </p>
-          </aside>
-        </section>
-
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold">
-            Internal Notes
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Add a note for the reviewing team. Notes are temporary
-            in this frontend preview.
-          </p>
-
-          <label
-            htmlFor="internal-note"
-            className="mb-2 mt-5 block text-sm font-semibold"
-          >
-            Write a note
-          </label>
-
-          <textarea
-            id="internal-note"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="Enter investigation observations or follow-up actions..."
-            rows={4}
-            className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-          />
-
-          <button
-            type="button"
-            onClick={addNote}
-            className="mt-3 rounded-lg bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700"
-          >
-            Add Note
-          </button>
-
-          {savedNotes.length > 0 && (
-            <div className="mt-6 space-y-3">
-              <h3 className="font-semibold">
-                Notes in this preview
-              </h3>
-
-              {savedNotes.map((savedNote, index) => (
-                <div
-                  key={`${index}-${savedNote}`}
-                  className="rounded-lg bg-slate-50 p-4 text-sm leading-6 text-slate-700"
-                >
-                  {savedNote}
-                </div>
+          <Section title="Status history">
+            <ol className="flex flex-col gap-3 border-l-2 border-border pl-4">
+              {report.statusHistory.map((entry) => (
+                <li key={entry.id} className="flex flex-col gap-0.5 text-sm">
+                  <span className="font-medium text-ink">
+                    {entry.fromStatus
+                      ? `${STATUS_LABELS[entry.fromStatus]} → ${STATUS_LABELS[entry.toStatus]}`
+                      : `Report submitted (${STATUS_LABELS[entry.toStatus]})`}
+                  </span>
+                  <span className="text-text-secondary">
+                    {formatDateTime(entry.createdAt)}
+                    {entry.fromStatus
+                      ? ` · by ${entry.changedBy?.name ?? "a former admin"}`
+                      : ""}
+                  </span>
+                </li>
               ))}
-            </div>
-          )}
-        </section>
+            </ol>
+          </Section>
+        </div>
 
-        {message && (
-          <p
-            role="status"
-            className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900"
+        <div className="flex flex-col gap-6">
+          <Section title="Update status">
+            <StatusUpdateForm reportId={report.id} currentStatus={report.status} />
+          </Section>
+
+          <Section
+            title="Internal notes"
+            aside={
+              <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-text-secondary">
+                <Lock className="h-3 w-3" aria-hidden="true" /> Admins only
+              </span>
+            }
           >
-            {message}
-          </p>
-        )}
+            <NoteForm reportId={report.id} />
+            {report.notes.length === 0 ? (
+              <p className="text-sm text-text-secondary">No internal notes yet.</p>
+            ) : (
+              <ul className="flex flex-col gap-3 border-t border-border pt-3">
+                {report.notes.map((note) => (
+                  <li key={note.id} className="flex flex-col gap-1 rounded-md bg-light-gold p-3 text-sm">
+                    <p className="whitespace-pre-wrap break-words text-ink">{note.body}</p>
+                    <p className="text-xs text-text-secondary">
+                      {note.author.name} · {formatDateTime(note.createdAt)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+        </div>
       </div>
-    </main>
+    </>
   );
 }
-export default function AdminReportDetailsPage() {
+
+function Reporter({ report }: { report: AdminReportDetail }) {
+  if (!report.reporter) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <EyeOff className="h-4 w-4 text-text-muted" aria-hidden="true" />
+        Anonymous. The reporter&apos;s identity is hidden.
+      </span>
+    );
+  }
   return (
-    <Suspense fallback={<div>Loading report...</div>}>
-      <AdminReportDetailsContent />
-    </Suspense>
+    <span>
+      {report.reporter.name}{" "}
+      <span className="text-text-secondary">({report.reporter.email})</span>
+    </span>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading report">
+      <div className="h-8 w-2/3 rounded bg-white" />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="h-64 rounded-lg border border-border bg-white" />
+        <div className="h-64 rounded-lg border border-border bg-white" />
+      </div>
+    </div>
   );
 }

@@ -1,319 +1,97 @@
-"use client";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-type ReportStatus =
-  | "Pending"
-  | "Investigating"
-  | "Resolved"
-  | "Rejected";
+import { Suspense } from "react";
+import { ArrowRight } from "lucide-react";
+import { ListSkeleton, ReportList } from "@/features/admin/components/report-list";
+import { STATUS_LABELS, STATUS_ORDER } from "@/features/reports/labels";
+import { requireAdmin } from "@/lib/permissions";
+import { getReportOverview } from "@/server/services/admin-report-service";
 
-type Report = {
-  id: string;
-  title: string;
-  location: string;
-  status: ReportStatus;
-  date: string;
-  priority: "High" | "Medium" | "Low";
-};
+export const metadata: Metadata = { title: "Admin overview · Soro" };
 
-const sampleReports: Report[] = [
-  {
-    id: "SORO-001",
-    title: "Suspicious activity near lecture hall",
-    location: "Lecture Hall",
-    status: "Pending",
-    date: "Oct 23, 2026",
-    priority: "High",
-  },
-  {
-    id: "SORO-002",
-    title: "Lost student identification card",
-    location: "Faculty Building",
-    status: "Investigating",
-    date: "Oct 22, 2026",
-    priority: "Medium",
-  },
-  {
-    id: "SORO-003",
-    title: "Damaged campus streetlight",
-    location: "Main Campus Road",
-    status: "Resolved",
-    date: "Oct 21, 2026",
-    priority: "Low",
-  },
-  {
-    id: "SORO-004",
-    title: "Reported theft near hostel",
-    location: "Student Hostel",
-    status: "Pending",
-    date: "Oct 20, 2026",
-    priority: "High",
-  },
-    {
-    id: "SORO-005",
-    title: "Damaged classroom door",
-    location: "Science Faculty",
-    status: "Rejected",
-    date: "Oct 19, 2026",
-    priority: "Low",
-  },
-];
-
-function statusStyle(status: ReportStatus) {
-  switch (status) {
-    case "Pending":
-      return "bg-amber-100 text-amber-800";
-    case "Investigating":
-      return "bg-blue-100 text-blue-800";
-    case "Resolved":
-      return "bg-green-100 text-green-800";
-    case "Rejected":
-      return "bg-red-100 text-red-800";
-  }
+export default function AdminOverviewPage() {
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-bold tracking-tight text-brand sm:text-3xl">Overview</h1>
+      <Suspense fallback={<OverviewSkeleton />}>
+        <Overview />
+      </Suspense>
+    </div>
+  );
 }
 
-function priorityStyle(priority: Report["priority"]) {
-  switch (priority) {
-    case "High":
-      return "text-red-700";
-    case "Medium":
-      return "text-amber-700";
-    case "Low":
-      return "text-green-700";
-  }
-}
-
-export default function AdminDashboardPage() {
-  const [reports, setReports] = useState<Report[]>(sampleReports);
-
-useEffect(() => {
-  function loadReports() {
-    try {
-      const savedStatuses = JSON.parse(
-        localStorage.getItem("soro-report-statuses") || "{}"
-      ) as Record<string, ReportStatus>;
-
-      const submittedReports = JSON.parse(
-        localStorage.getItem("soro-submitted-reports") || "[]"
-      ) as Report[];
-
-      const allReports = [
-        ...submittedReports,
-        ...sampleReports,
-      ];
-
-      setReports(
-        allReports.map((report) => ({
-          ...report,
-          status: savedStatuses[report.id] ?? report.status,
-        }))
-      );
-    } catch (error) {
-      console.error("Could not load reports:", error);
-      setReports(sampleReports);
-    }
-  }
-
-  loadReports();
-
-  window.addEventListener("focus", loadReports);
-  window.addEventListener("storage", loadReports);
-
-  return () => {
-    window.removeEventListener("focus", loadReports);
-    window.removeEventListener("storage", loadReports);
-  };
-}, []);
-
-  const pending = reports.filter(
-    (report) => report.status === "Pending"
-  ).length;
-
-  const investigating = reports.filter(
-    (report) => report.status === "Investigating"
-  ).length;
-
-  const resolved = reports.filter(
-    (report) => report.status === "Resolved"
-  ).length;
+async function Overview() {
+  const admin = await requireAdmin("/admin");
+  const { total, byStatus, openUrgentCount, urgentQueue } = await getReportOverview(admin);
 
   const stats = [
-    {
-      label: "Total Reports",
-      value: reports.length,
-      symbol: "📋",
-      color: "bg-blue-50",
-    },
-    {
-      label: "Pending Reports",
-      value: pending,
-      symbol: "⏳",
-      color: "bg-amber-50",
-    },
-    {
-      label: "Under Investigation",
-      value: investigating,
-      symbol: "🔎",
-      color: "bg-indigo-50",
-    },
-    {
-      label: "Resolved Reports",
-      value: resolved,
-      symbol: "✓",
-      color: "bg-green-50",
-    },
+    { label: "Total reports", value: total, href: "/admin/reports" },
+    ...STATUS_ORDER.map((status) => ({
+      label: STATUS_LABELS[status],
+      value: byStatus[status],
+      href: `/admin/reports?status=${status}`,
+    })),
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 text-slate-900 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-7">
-        <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">
-              SORO ADMINISTRATION
-            </p>
+    <>
+      <section aria-labelledby="counts-heading">
+        <h2 id="counts-heading" className="sr-only">Report counts</h2>
+        <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <li key={stat.label}>
+              <Link
+                href={stat.href}
+                className="flex flex-col gap-1 rounded-lg border border-border bg-white p-4 transition-colors hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                <span className="text-sm font-medium text-text-secondary">{stat.label}</span>
+                <span className="text-3xl font-bold tabular-nums text-ink">{stat.value}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-            <h1 className="mt-2 text-2xl font-bold sm:text-3xl">
-              Admin Dashboard
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Monitor and manage campus safety reports.
-            </p>
-          </div>
-
+      <section aria-labelledby="urgent-heading" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="urgent-heading" className="text-lg font-semibold text-ink">
+            Needs attention{" "}
+            <span className="font-normal text-text-secondary">
+              ({openUrgentCount} open high or critical)
+            </span>
+          </h2>
           <Link
             href="/admin/reports"
-            className="inline-flex w-fit items-center justify-center rounded-lg bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand underline-offset-4 hover:underline"
           >
-            View All Reports →
+            All reports <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-        </header>
-
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <strong>Preview mode:</strong> The reports displayed here
-          are sample data. They are not real campus reports.
         </div>
+        {total === 0 ? (
+          <p className="rounded-lg border border-dashed border-border-strong bg-white p-6 text-center text-sm text-text-secondary">
+            No reports have been submitted yet.
+          </p>
+        ) : urgentQueue.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border-strong bg-white p-6 text-center text-sm text-text-secondary">
+            No open high or critical reports right now.
+          </p>
+        ) : (
+          <ReportList reports={urgentQueue} />
+        )}
+      </section>
+    </>
+  );
+}
 
-        <section
-          aria-label="Report statistics"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
-        >
-          {stats.map((stat) => (
-            <article
-              key={stat.label}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-slate-500">
-                  {stat.label}
-                </p>
-
-                <span
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg text-xl ${stat.color}`}
-                >
-                  {stat.symbol}
-                </span>
-              </div>
-
-              <p className="mt-4 text-3xl font-bold">
-                {stat.value}
-              </p>
-            </article>
-          ))}
-        </section>
-
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-5 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-lg font-bold">
-                Recent Reports
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                A quick overview of recently submitted reports.
-              </p>
-            </div>
-
-            <Link
-              href="/admin/reports"
-              className="text-sm font-semibold text-blue-700 hover:underline"
-            >
-              See all reports
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500">
-                <tr>
-                  <th className="px-5 py-4 font-medium">
-                    Report
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Location
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Priority
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Status
-                  </th>
-                  <th className="px-5 py-4 font-medium">
-                    Details
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-slate-50">
-                    <td className="px-5 py-4">
-                      <p className="font-semibold">
-                        {report.title}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {report.id} · {report.date}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600">
-                      {report.location}
-                    </td>
-
-                    <td
-                      className={`px-5 py-4 font-semibold ${priorityStyle(report.priority)}`}
-                    >
-                      {report.priority}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyle(report.status)}`}
-                      >
-                        {report.status}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <Link
-                        href={`/admin/reports/${report.id}`}
-                        className="font-semibold text-blue-700 hover:underline"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <footer className="text-xs text-slate-500">
-          Soro Campus Safety · Admin overview
-        </footer>
+function OverviewSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true" aria-label="Loading overview">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className="h-24 rounded-lg border border-border bg-white" />
+        ))}
       </div>
-    </main>
+      <ListSkeleton rows={3} />
+    </div>
   );
 }
