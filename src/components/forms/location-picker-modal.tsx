@@ -7,13 +7,16 @@ import {
   Check,
   Compass,
   Crosshair,
+  Layers,
   Loader2,
+  Map as MapIcon,
   MapPin,
   Search,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   LOCATION_MESSAGES,
   LocationError,
@@ -51,6 +54,7 @@ export function LocationPickerModal({
   const mapRef = useRef<MapLibreType.Map | null>(null);
 
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "failed">("loading");
+  const [mapMode, setMapMode] = useState<"satellite" | "streets">("satellite");
   const [isMoving, setIsMoving] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState<string>("");
   const [isResolving, setIsResolving] = useState(false);
@@ -61,6 +65,25 @@ export function LocationPickerModal({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Place[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  function toggleMapMode(mode: "satellite" | "streets") {
+    setMapMode(mode);
+    const map = mapRef.current;
+    if (!map) return;
+    try {
+      if (mode === "satellite") {
+        map.setLayoutProperty("satellite-layer", "visibility", "visible");
+        map.setLayoutProperty("satellite-labels-layer", "visibility", "visible");
+        map.setLayoutProperty("osm-layer", "visibility", "none");
+      } else {
+        map.setLayoutProperty("satellite-layer", "visibility", "none");
+        map.setLayoutProperty("satellite-labels-layer", "visibility", "none");
+        map.setLayoutProperty("osm-layer", "visibility", "visible");
+      }
+    } catch {
+      // Map style might still be loading
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -82,25 +105,67 @@ export function LocationPickerModal({
           style: {
             version: 8,
             sources: {
+              satellite: {
+                type: "raster",
+                tiles: [
+                  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                ],
+                tileSize: 256,
+                attribution: "Esri, Maxar, Earthstar Geographics",
+                maxzoom: 19,
+              },
+              satelliteLabels: {
+                type: "raster",
+                tiles: [
+                  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+                ],
+                tileSize: 256,
+                attribution: "",
+                maxzoom: 19,
+              },
               osm: {
                 type: "raster",
                 tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
                 tileSize: 256,
                 attribution: "© OpenStreetMap contributors",
+                maxzoom: 19,
               },
             },
             layers: [
               {
-                id: "osm-tiles",
+                id: "satellite-layer",
+                type: "raster",
+                source: "satellite",
+                minzoom: 0,
+                maxzoom: 19,
+                layout: {
+                  visibility: "visible",
+                },
+              },
+              {
+                id: "satellite-labels-layer",
+                type: "raster",
+                source: "satelliteLabels",
+                minzoom: 0,
+                maxzoom: 19,
+                layout: {
+                  visibility: "visible",
+                },
+              },
+              {
+                id: "osm-layer",
                 type: "raster",
                 source: "osm",
                 minzoom: 0,
                 maxzoom: 19,
+                layout: {
+                  visibility: "none",
+                },
               },
             ],
           },
           center: OAU_CAMPUS_CENTER,
-          zoom: 16,
+          zoom: 16.5,
           attributionControl: { compact: true },
         });
 
@@ -339,6 +404,34 @@ export function LocationPickerModal({
         {/* Map Stage */}
         <div className="relative flex-1 overflow-hidden bg-slate-100">
           <div ref={containerRef} className="h-full w-full" />
+
+          {/* Satellite / Streets Mode Toggle */}
+          <div className="absolute right-3 top-3 z-30 flex items-center rounded-lg border border-border/80 bg-white/95 p-1 shadow-md backdrop-blur-xs">
+            <button
+              type="button"
+              onClick={() => toggleMapMode("satellite")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all",
+                mapMode === "satellite"
+                  ? "bg-brand text-white shadow-xs"
+                  : "text-text-secondary hover:text-ink",
+              )}
+            >
+              <Layers className="h-3.5 w-3.5 text-gold" /> Satellite
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleMapMode("streets")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-all",
+                mapMode === "streets"
+                  ? "bg-brand text-white shadow-xs"
+                  : "text-text-secondary hover:text-ink",
+              )}
+            >
+              <MapIcon className="h-3.5 w-3.5" /> Streets
+            </button>
+          </div>
 
           {/* Fixed Center Pin */}
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
