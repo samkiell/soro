@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Crosshair, Loader2, Map } from "lucide-react";
 import { applyFieldErrors } from "@/components/forms/apply-field-errors";
 import { FormField } from "@/components/forms/form-field";
+import { LocationPickerModal } from "@/components/forms/location-picker-modal";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { createReport } from "@/features/reports/actions";
 import { INCIDENT_TYPE_OPTIONS, STATUS_LABELS, URGENCY_OPTIONS } from "@/features/reports/labels";
 import { formatDateTime, reportReference } from "@/lib/format";
+import {
+  LOCATION_MESSAGES,
+  LocationError,
+  requestDeviceLocation,
+} from "@/lib/geolocation";
+import type { Place } from "@/lib/places";
 import { MAX_PHOTO_BYTES, PHOTO_TYPES, formatBytes } from "@/lib/storage/image";
 import {
   REPORT_LIMITS,
@@ -24,6 +31,18 @@ import {
 } from "@/lib/validation/report";
 import type { CreateReportResult, UploadPhotoError, UploadPhotoResult } from "@/types";
 import { PhotoField, type PhotoState } from "./photo-field";
+
+const QUICK_LANDMARKS = [
+  "Senate Building",
+  "Hezekiah Library",
+  "Amphitheatre",
+  "Spider Building",
+  "Moremi Hall",
+  "Awo Hall",
+  "Fajuyi Hall",
+  "Health Centre",
+  "SUB",
+] as const;
 
 const REPORT_FIELDS = [
   "title",
@@ -60,6 +79,9 @@ export function ReportForm() {
   const skipPhoto = useRef(false);
   const messageRef = useRef<HTMLDivElement>(null);
   const confirmationRef = useRef<HTMLDivElement>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const {
     register,
@@ -67,6 +89,7 @@ export function ReportForm() {
     setError,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ReportFieldsInput, unknown, ReportFields>({
     resolver: zodResolver(reportFieldsSchema),
@@ -78,6 +101,36 @@ export function ReportForm() {
     },
   });
   const urgency = useWatch({ control, name: "urgency" });
+  const currentLocationValue = useWatch({ control, name: "location" });
+
+  async function handleDetectLocation() {
+    setIsLocating(true);
+    setLocationError(null);
+    try {
+      const coords = await requestDeviceLocation();
+      const res = await fetch(`/api/places?lat=${coords.latitude}&lon=${coords.longitude}`);
+      if (res.ok) {
+        const data = (await res.json()) as { place?: Place | null };
+        if (data.place?.label) {
+          setValue("location", data.place.label, { shouldValidate: true });
+          return;
+        }
+      }
+      setValue(
+        "location",
+        `OAU Campus (${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)})`,
+        { shouldValidate: true },
+      );
+    } catch (err) {
+      if (err instanceof LocationError) {
+        setLocationError(LOCATION_MESSAGES[err.failure]);
+      } else {
+        setLocationError("Could not acquire your device location. Please enter it manually.");
+      }
+    } finally {
+      setIsLocating(false);
+    }
+  }
 
   function setPhoto(next: PhotoState) {
     photoRef.current = next;
@@ -257,7 +310,7 @@ export function ReportForm() {
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            href={`/report/${submitted.id}`}
+            href={`/report/${reportReference(submitted.id)}`}
             className={buttonVariants({ variant: "default" })}
           >
             View report details
@@ -327,15 +380,74 @@ export function ReportForm() {
         )}
       </FormField>
 
-      <FormField
-        id="location"
-        label="Location"
-        required
-        hint="As specific as you can: building, hall, faculty, room, or nearest landmark."
-        error={errors.location?.message}
-      >
-        {(c) => <Input {...c} {...register("location")} maxLength={REPORT_LIMITS.location.max} />}
-      </FormField>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label htmlFor="location" className="text-sm font-semibold text-ink">
+            Location
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void handleDetectLocation()}
+              disabled={isLocating}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-surface-muted hover:border-brand/40 disabled:opacity-60"
+            >
+              {isLocating ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" aria-hidden="true" />
+              ) : (
+                <Crosshair className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+              )}
+              {isLocating ? "Finding you…" : "Current GPS"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsMapOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-2.5 py-1 text-xs font-semibold text-brand transition-colors hover:bg-surface-muted hover:border-brand/40"
+            >
+              <Map className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+              Pick on map
+            </button>
+          </div>
+        </div>
+
+        <p id="location-hint" className="text-sm text-text-secondary">
+          As specific as you can: building, hall, faculty, room, or nearest landmark.
+        </p>
+
+        <Input
+          id="location"
+          {...register("location")}
+          aria-describedby={errors.location ? "location-error" : "location-hint"}
+          maxLength={REPORT_LIMITS.location.max}
+          placeholder="e.g. Hezekiah Library 2nd Floor, or Moremi Block A"
+        />
+
+        {locationError ? (
+          <p className="rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900" role="alert">
+            {locationError}
+          </p>
+        ) : null}
+
+        {errors.location ? (
+          <p id="location-error" className="text-sm font-medium text-danger">
+            {errors.location.message}
+          </p>
+        ) : null}
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-1 no-scrollbar">
+          <span className="shrink-0 text-[11px] font-medium text-text-muted">Quick landmarks:</span>
+          {QUICK_LANDMARKS.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setValue("location", `${name}, OAU Campus`, { shouldValidate: true })}
+              className="shrink-0 rounded-full border border-border/80 bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-ink transition-colors hover:border-gold hover:bg-warm-cream"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <FormField id="incidentType" label="Incident type" required error={errors.incidentType?.message}>
         {(c) => (
@@ -437,6 +549,13 @@ export function ReportForm() {
           {stage === "uploading" ? "Uploading photo" : stage === "saving" ? "Submitting report" : ""}
         </p>
       </div>
+
+      <LocationPickerModal
+        isOpen={isMapOpen}
+        onClose={() => setIsMapOpen(false)}
+        onConfirm={(loc) => setValue("location", loc, { shouldValidate: true })}
+        initialLocation={currentLocationValue}
+      />
     </form>
   );
 }

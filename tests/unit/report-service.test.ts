@@ -5,6 +5,7 @@ const prisma = vi.hoisted(() => ({
     create: vi.fn(),
     findMany: vi.fn(),
     findUnique: vi.fn(),
+    findFirst: vi.fn(),
   },
 }));
 const storage = vi.hoisted(() => ({ photoExists: vi.fn() }));
@@ -243,5 +244,19 @@ describe("getReportForStudent", () => {
     const report = await getReportForStudent(admin, "creport1");
     expect(report).not.toBeNull();
     expect(report?.id).toBe("creport1");
+  });
+
+  it("returns report details when queried by 8-character reference code", async () => {
+    prisma.report.findUnique.mockResolvedValue(null);
+    prisma.report.findFirst.mockResolvedValue(dummyReport);
+
+    const report = await getReportForStudent(null, "CREPORT1");
+    expect(report).not.toBeNull();
+    expect(report?.id).toBe("creport1");
+    expect(prisma.report.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: { endsWith: "creport1" } },
+      }),
+    );
   });
 });

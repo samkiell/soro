@@ -97,42 +97,53 @@ export async function listReports(actor: Actor, filters: ReportFilters) {
 export async function getReportForAdmin(actor: Actor, reportId: string) {
   assertAdmin(actor);
 
-  const report = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      location: true,
-      incidentType: true,
-      urgency: true,
-      status: true,
-      isAnonymous: true,
-      photoKey: true,
-      createdAt: true,
-      updatedAt: true,
-      reporter: { select: { name: true, email: true } },
-      statusHistory: {
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          fromStatus: true,
-          toStatus: true,
-          createdAt: true,
-          changedBy: { select: { name: true } },
-        },
-      },
-      notes: {
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          body: true,
-          createdAt: true,
-          author: { select: { name: true } },
-        },
+  const trimmed = reportId.trim();
+  const select = {
+    id: true,
+    title: true,
+    description: true,
+    location: true,
+    incidentType: true,
+    urgency: true,
+    status: true,
+    isAnonymous: true,
+    photoKey: true,
+    createdAt: true,
+    updatedAt: true,
+    reporter: { select: { name: true, email: true } },
+    statusHistory: {
+      orderBy: { createdAt: "asc" as const },
+      select: {
+        id: true,
+        fromStatus: true,
+        toStatus: true,
+        createdAt: true,
+        changedBy: { select: { name: true } },
       },
     },
+    notes: {
+      orderBy: { createdAt: "desc" as const },
+      select: {
+        id: true,
+        body: true,
+        createdAt: true,
+        author: { select: { name: true } },
+      },
+    },
+  };
+
+  let report = await prisma.report.findUnique({
+    where: { id: trimmed },
+    select,
   });
+
+  if (!report && trimmed.length === 8) {
+    report = await prisma.report.findFirst({
+      where: { id: { endsWith: trimmed.toLowerCase() } },
+      select,
+    });
+  }
+
   if (!report) return null;
 
   const { reporter, photoKey, ...rest } = report;

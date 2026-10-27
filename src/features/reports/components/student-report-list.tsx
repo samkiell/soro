@@ -172,7 +172,7 @@ export function StudentReportList({ reports }: { reports: StudentReportListItem[
           {filteredReports.map((report) => (
             <li key={report.id}>
               <Link
-                href={`/report/${report.id}`}
+                href={`/report/${reportReference(report.id)}`}
                 className="group relative flex flex-col justify-between gap-4 rounded-xl border border-border bg-white p-5 shadow-2xs transition-all hover:border-brand/40 hover:shadow-xs focus-visible:outline-2 focus-visible:outline-brand sm:flex-row sm:items-center sm:p-6"
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-2.5">

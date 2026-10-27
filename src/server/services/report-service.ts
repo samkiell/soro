@@ -72,11 +72,19 @@ export async function createReportForUser(
 }
 
 /** Minimal lookup for authorizing access to a report's photo. */
-export function findReportPhotoRef(reportId: string) {
-  return prisma.report.findUnique({
-    where: { id: reportId },
+export async function findReportPhotoRef(reportIdOrRef: string) {
+  const trimmed = reportIdOrRef.trim();
+  let report = await prisma.report.findUnique({
+    where: { id: trimmed },
     select: { reporterId: true, photoKey: true },
   });
+  if (!report && trimmed.length === 8) {
+    report = await prisma.report.findFirst({
+      where: { id: { endsWith: trimmed.toLowerCase() } },
+      select: { reporterId: true, photoKey: true },
+    });
+  }
+  return report;
 }
 
 export type StudentReportListItem = {
@@ -144,43 +152,64 @@ export type StudentReportDetail = {
 };
 
 /**
- * Returns a report and its user-visible status history for the student who submitted it.
+ * Returns a report and its user-visible status history for the student who submitted it,
+ * or for any viewer tracking via a valid 8-character reference code.
  * Internal admin notes are completely excluded from the query so they cannot leak.
  * Non-owners and non-existent reports return null to protect privacy.
  */
 export async function getReportForStudent(
-  actor: Actor,
-  reportId: string,
+  actor: Actor | null | undefined,
+  reportIdOrRef: string,
 ): Promise<StudentReportDetail | null> {
-  const report = await prisma.report.findUnique({
-    where: { id: reportId },
-    select: {
-      id: true,
-      reporterId: true,
-      title: true,
-      description: true,
-      location: true,
-      incidentType: true,
-      urgency: true,
-      status: true,
-      isAnonymous: true,
-      photoKey: true,
-      createdAt: true,
-      updatedAt: true,
-      statusHistory: {
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          fromStatus: true,
-          toStatus: true,
-          createdAt: true,
-          changedBy: { select: { name: true } },
-        },
+  const trimmed = reportIdOrRef.trim();
+  const isRefQuery = trimmed.length === 8;
+
+  const select = {
+    id: true,
+    reporterId: true,
+    title: true,
+    description: true,
+    location: true,
+    incidentType: true,
+    urgency: true,
+    status: true,
+    isAnonymous: true,
+    photoKey: true,
+    createdAt: true,
+    updatedAt: true,
+    statusHistory: {
+      orderBy: { createdAt: "asc" as const },
+      select: {
+        id: true,
+        fromStatus: true,
+        toStatus: true,
+        createdAt: true,
+        changedBy: { select: { name: true } },
       },
     },
+  };
+
+  let report = await prisma.report.findUnique({
+    where: { id: trimmed },
+    select,
   });
 
-  if (!report || !canViewReport(actor, report)) {
+  let matchedByRef = false;
+  if (!report && isRefQuery) {
+    report = await prisma.report.findFirst({
+      where: { id: { endsWith: trimmed.toLowerCase() } },
+      select,
+    });
+    if (report) matchedByRef = true;
+  }
+
+  if (!report) {
+    return null;
+  }
+
+  // If queried by exact database ID, enforce actor ownership/admin permissions.
+  // If queried by valid 8-char reference code, allow viewing status & public details.
+  if (!matchedByRef && (!actor || !canViewReport(actor, report))) {
     return null;
   }
 

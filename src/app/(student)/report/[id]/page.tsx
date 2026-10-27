@@ -18,7 +18,7 @@ import { ReportPhoto } from "@/components/reports/report-photo";
 import { buttonVariants } from "@/components/ui/button";
 import { INCIDENT_TYPE_LABELS, STATUS_LABELS } from "@/features/reports/labels";
 import { formatDateTime, reportReference } from "@/lib/format";
-import { requireUser } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { getReportForStudent } from "@/server/services/report-service";
 import type { ReportStatus } from "@/types";
@@ -33,18 +33,27 @@ type Params = Promise<{ id: string }>;
 export default function StudentReportDetailPage({ params }: { params: Params }) {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6">
-      <Link
-        href="/dashboard"
-        className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-brand underline-offset-4 hover:underline"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to my reports
-      </Link>
+      <Suspense fallback={<div className="h-5 w-32 rounded bg-surface-muted" />}>
+        <BackLink />
+      </Suspense>
 
       <Suspense fallback={<DetailSkeleton />}>
         <ReportDetailContent params={params} />
       </Suspense>
     </div>
+  );
+}
+
+async function BackLink() {
+  const user = await getCurrentUser().catch(() => null);
+  return (
+    <Link
+      href={user ? "/dashboard" : "/"}
+      className="inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-brand underline-offset-4 hover:underline"
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      {user ? "Back to my reports" : "Back to home"}
+    </Link>
   );
 }
 
@@ -70,7 +79,7 @@ function Section({
 
 async function ReportDetailContent({ params }: { params: Params }) {
   const { id } = await params;
-  const user = await requireUser(`/report/${id}`);
+  const user = await getCurrentUser().catch(() => null);
   const report = await getReportForStudent(user, id);
 
   if (!report) notFound();
