@@ -26,8 +26,10 @@ import {
 import {
   OAU_CAMPUS_CENTER,
   OAU_LANDMARKS,
+  cleanLocationLabel,
   formatCampusFallbackLocation,
   isGenericLocation,
+  isOAUCampus,
   type Place,
 } from "@/lib/places";
 
@@ -175,12 +177,16 @@ export function LocationPickerModal({
 
           timer = window.setTimeout(async () => {
             try {
+              if (isOAUCampus(lat, lng)) {
+                setResolvedAddress(formatCampusFallbackLocation(lat, lng));
+                return;
+              }
               const res = await fetch(`/api/places?lat=${lat}&lon=${lng}`, { signal });
               if (signal.aborted || cancelled) return;
               if (res.ok) {
                 const data = (await res.json()) as { place?: Place | null };
                 if (data.place?.label && !isGenericLocation(data.place.label)) {
-                  setResolvedAddress(data.place.label);
+                  setResolvedAddress(cleanLocationLabel(data.place.label));
                 } else {
                   setResolvedAddress(formatCampusFallbackLocation(lat, lng));
                 }
@@ -284,7 +290,7 @@ export function LocationPickerModal({
   }
 
   function handleSelectLandmark(landmark: (typeof OAU_LANDMARKS)[0]) {
-    setResolvedAddress(`${landmark.name}, Obafemi Awolowo University, Ile-Ife`);
+    setResolvedAddress(landmark.name);
     mapRef.current?.flyTo({
       center: landmark.coords,
       zoom: 17.5,
@@ -485,7 +491,7 @@ export function LocationPickerModal({
                   <p className="text-xs text-text-muted animate-pulse">Resolving location details...</p>
                 ) : (
                   <p className="truncate text-sm font-bold text-ink">
-                    {resolvedAddress || initialLocation || "OAU Campus, Ile-Ife"}
+                    {resolvedAddress || initialLocation || "OAU Campus"}
                   </p>
                 )}
               </div>
@@ -499,7 +505,7 @@ export function LocationPickerModal({
                 type="button"
                 size="sm"
                 onClick={() => {
-                  const finalLoc = resolvedAddress || initialLocation || "OAU Campus, Ile-Ife";
+                  const finalLoc = resolvedAddress || initialLocation || "OAU Campus";
                   onConfirm(finalLoc);
                   onClose();
                 }}

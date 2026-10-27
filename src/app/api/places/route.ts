@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
-import { fromNominatim, fromPhoton, type NominatimResult, type PhotonFeature, type Place } from "@/lib/places";
+import {
+  fromNominatim,
+  fromPhoton,
+  isOAUCampus,
+  formatCampusFallbackLocation,
+  OAU_LANDMARKS,
+  type NominatimResult,
+  type PhotonFeature,
+  type Place,
+} from "@/lib/places";
 
 const USER_AGENT = "Soro-OAU-Campus-Safety/1.0 (campus-safety@oauife.edu.ng)";
 const TIMEOUT_MS = 6000;
@@ -23,6 +32,21 @@ async function fetchJson<T>(url: string, revalidateSecs = 3600): Promise<T | nul
 }
 
 async function reverse(lat: number, lon: number): Promise<Place | null> {
+  // If coordinates are on or near OAU campus, resolve immediately to campus landmark/hostel
+  if (isOAUCampus(lat, lon)) {
+    const label = formatCampusFallbackLocation(lat, lon);
+    return {
+      id: `${lat.toFixed(5)},${lon.toFixed(5)}`,
+      label,
+      address: label,
+      area: "",
+      city: "",
+      state: "",
+      latitude: Number(lat.toFixed(6)),
+      longitude: Number(lon.toFixed(6)),
+    };
+  }
+
   const params = new URLSearchParams({
     lat: String(lat),
     lon: String(lon),
@@ -35,6 +59,27 @@ async function reverse(lat: number, lon: number): Promise<Place | null> {
 }
 
 async function search(text: string, near?: { lat: number; lon: number } | null): Promise<Place[]> {
+  const qClean = text.trim().toLowerCase();
+
+  // Search local OAU landmarks first for instant and accurate campus matching
+  const campusMatches: Place[] = OAU_LANDMARKS
+    .filter((lm) => lm.name.toLowerCase().includes(qClean))
+    .slice(0, 6)
+    .map((lm) => ({
+      id: `${lm.coords[1].toFixed(5)},${lm.coords[0].toFixed(5)}`,
+      label: lm.name,
+      address: lm.name,
+      area: "",
+      city: "",
+      state: "",
+      latitude: lm.coords[1],
+      longitude: lm.coords[0],
+    }));
+
+  if (campusMatches.length >= 4) {
+    return campusMatches;
+  }
+
   const photonParams = new URLSearchParams({
     q: text,
     limit: "6",
@@ -51,15 +96,16 @@ async function search(text: string, near?: { lat: number; lon: number } | null):
     86400,
   );
 
+  const list: Place[] = [...campusMatches];
+
   if (photonData?.features && photonData.features.length > 0) {
-    const list: Place[] = [];
     for (const f of photonData.features) {
       const p = fromPhoton(f);
       if (p && !list.some((existing) => existing.label === p.label)) {
         list.push(p);
       }
     }
-    if (list.length > 0) return list;
+    if (list.length > 0) return list.slice(0, 8);
   }
 
   const nomParams = new URLSearchParams({
@@ -75,17 +121,15 @@ async function search(text: string, near?: { lat: number; lon: number } | null):
   );
 
   if (nomData) {
-    const list: Place[] = [];
     for (const item of nomData) {
       const p = fromNominatim(item);
       if (p && !list.some((existing) => existing.label === p.label)) {
         list.push(p);
       }
     }
-    return list;
   }
 
-  return [];
+  return list.slice(0, 8);
 }
 
 export async function GET(request: Request) {

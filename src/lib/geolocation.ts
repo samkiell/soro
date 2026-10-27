@@ -46,12 +46,14 @@ export async function requestDeviceLocation(): Promise<Coordinates> {
 
   let position: GeolocationPosition;
   try {
-    position = await attempt({ enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 });
+    // Prioritize high-accuracy hardware GPS first without stale cache
+    position = await attempt({ enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
   } catch (first) {
     const failure = failureFrom(first as GeolocationPositionError);
     if (failure === "denied") throw new LocationError(failure);
     try {
-      position = await attempt({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      // Fall back to network location only if GPS fix failed
+      position = await attempt({ enableHighAccuracy: false, timeout: 6000, maximumAge: 30000 });
     } catch (second) {
       throw new LocationError(failureFrom(second as GeolocationPositionError));
     }

@@ -22,8 +22,10 @@ import {
   requestDeviceLocation,
 } from "@/lib/geolocation";
 import {
+  cleanLocationLabel,
   formatCampusFallbackLocation,
   isGenericLocation,
+  isOAUCampus,
   type Place,
 } from "@/lib/places";
 import { MAX_PHOTO_BYTES, PHOTO_TYPES, formatBytes } from "@/lib/storage/image";
@@ -112,12 +114,24 @@ export function ReportForm() {
     setLocationError(null);
     try {
       const coords = await requestDeviceLocation();
+
+      // If user is within OAU campus, resolve immediately to closest campus landmark/hostel
+      if (isOAUCampus(coords.latitude, coords.longitude)) {
+        setValue("location", formatCampusFallbackLocation(coords.latitude, coords.longitude), {
+          shouldValidate: true,
+        });
+        return;
+      }
+
       const res = await fetch(`/api/places?lat=${coords.latitude}&lon=${coords.longitude}`);
       if (res.ok) {
         const data = (await res.json()) as { place?: Place | null };
         if (data.place?.label && !isGenericLocation(data.place.label)) {
-          setValue("location", data.place.label, { shouldValidate: true });
-          return;
+          const cleaned = cleanLocationLabel(data.place.label);
+          if (cleaned) {
+            setValue("location", cleaned, { shouldValidate: true });
+            return;
+          }
         }
       }
       setValue(
@@ -444,7 +458,7 @@ export function ReportForm() {
             <button
               key={name}
               type="button"
-              onClick={() => setValue("location", `${name}, OAU Campus`, { shouldValidate: true })}
+              onClick={() => setValue("location", name, { shouldValidate: true })}
               className="shrink-0 rounded-full border border-border/80 bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-ink transition-colors hover:border-gold hover:bg-warm-cream"
             >
               {name}
