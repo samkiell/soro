@@ -265,11 +265,6 @@ async function ReportDetailContent({ params }: { params: Params }) {
                 );
               })}
             </ol>
-
-            <div className="rounded-lg bg-surface-muted p-3 text-xs text-text-secondary">
-              <strong className="block font-semibold text-ink">Privacy guarantee</strong>
-              Internal staff notes, investigative logs, and officer discussions are kept strictly confidential and are not shared with students.
-            </div>
           </Section>
 
           {/* Urgent Assistance Reminder */}
