@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const prisma = vi.hoisted(() => ({
-  report: { create: vi.fn() },
+  report: {
+    create: vi.fn(),
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+  },
 }));
 const storage = vi.hoisted(() => ({ photoExists: vi.fn() }));
 const permissions = vi.hoisted(() => ({ getCurrentUser: vi.fn() }));
@@ -14,9 +18,14 @@ vi.mock("@/lib/permissions", async () => ({
 }));
 
 import { createReport } from "@/features/reports/actions";
-import { createReportForUser } from "@/server/services/report-service";
+import {
+  createReportForUser,
+  getReportForStudent,
+  listReportsForStudent,
+} from "@/server/services/report-service";
 
 const student = { id: "cstudent1", role: "STUDENT" as const };
+const otherStudent = { id: "cstudent2", role: "STUDENT" as const };
 const admin = { id: "cadmin1", role: "ADMIN" as const };
 const ownKey = "reports/cstudent1/123e4567-e89b-42d3-a456-426614174000.jpg";
 const otherKey = "reports/cstudent2/123e4567-e89b-42d3-a456-426614174000.jpg";
@@ -119,5 +128,120 @@ describe("createReport server action", () => {
     const result = await createReport(input);
     expect(result.success).toBe(true);
     expect(prisma.report.create.mock.calls[0][0].data.reporterId).toBe(student.id);
+  });
+});
+
+describe("listReportsForStudent", () => {
+  it("queries only reports belonging to the student, sorted newest first", async () => {
+    prisma.report.findMany.mockResolvedValue([
+      {
+        id: "creport1",
+        title: "Broken streetlight",
+        location: "Moremi Hall",
+        incidentType: "FACILITY",
+        urgency: "LOW",
+        status: "RECEIVED",
+        isAnonymous: true,
+        photoKey: "reports/cstudent1/xyz.jpg",
+        createdAt: new Date("2026-10-25T11:00:00Z"),
+        updatedAt: new Date("2026-10-25T11:00:00Z"),
+      },
+      {
+        id: "creport2",
+        title: "Lost student ID",
+        location: "Library",
+        incidentType: "THEFT",
+        urgency: "MEDIUM",
+        status: "IN_PROGRESS",
+        isAnonymous: false,
+        photoKey: null,
+        createdAt: new Date("2026-10-24T09:00:00Z"),
+        updatedAt: new Date("2026-10-24T09:00:00Z"),
+      },
+    ]);
+
+    const items = await listReportsForStudent(student);
+
+    expect(prisma.report.findMany).toHaveBeenCalledWith({
+      where: { reporterId: student.id },
+      orderBy: { createdAt: "desc" },
+      select: expect.objectContaining({ id: true, photoKey: true }),
+    });
+    expect(items).toHaveLength(2);
+    expect(items[0]).toEqual(
+      expect.objectContaining({
+        id: "creport1",
+        hasPhoto: true,
+      }),
+    );
+    expect(items[0]).not.toHaveProperty("photoKey");
+    expect(items[1].hasPhoto).toBe(false);
+  });
+
+  it("returns an empty list when user has no reports", async () => {
+    prisma.report.findMany.mockResolvedValue([]);
+    const items = await listReportsForStudent(student);
+    expect(items).toEqual([]);
+  });
+});
+
+describe("getReportForStudent", () => {
+  const dummyReport = {
+    id: "creport1",
+    reporterId: student.id,
+    title: "Broken streetlight",
+    description: "Light is completely off at night.",
+    location: "Moremi Hall",
+    incidentType: "FACILITY",
+    urgency: "LOW",
+    status: "RECEIVED",
+    isAnonymous: true,
+    photoKey: "reports/cstudent1/xyz.jpg",
+    createdAt: new Date("2026-10-25T11:00:00Z"),
+    updatedAt: new Date("2026-10-25T11:00:00Z"),
+    statusHistory: [
+      {
+        id: "chist1",
+        fromStatus: null,
+        toStatus: "RECEIVED",
+        createdAt: new Date("2026-10-25T11:00:00Z"),
+        changedBy: null,
+      },
+    ],
+  };
+
+  it("returns report details and public status history for the owner", async () => {
+    prisma.report.findUnique.mockResolvedValue(dummyReport);
+
+    const report = await getReportForStudent(student, "creport1");
+
+    expect(report).not.toBeNull();
+    expect(report?.id).toBe("creport1");
+    expect(report?.hasPhoto).toBe(true);
+    expect(report).not.toHaveProperty("photoKey");
+    expect(report).not.toHaveProperty("reporterId");
+    expect(report?.statusHistory).toHaveLength(1);
+  });
+
+  it("returns null when the report belongs to another user", async () => {
+    prisma.report.findUnique.mockResolvedValue(dummyReport);
+
+    const report = await getReportForStudent(otherStudent, "creport1");
+    expect(report).toBeNull();
+  });
+
+  it("returns null when the report is not found", async () => {
+    prisma.report.findUnique.mockResolvedValue(null);
+
+    const report = await getReportForStudent(student, "cunknown");
+    expect(report).toBeNull();
+  });
+
+  it("allows admins to view report detail", async () => {
+    prisma.report.findUnique.mockResolvedValue(dummyReport);
+
+    const report = await getReportForStudent(admin, "creport1");
+    expect(report).not.toBeNull();
+    expect(report?.id).toBe("creport1");
   });
 });

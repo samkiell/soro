@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db/prisma";
-import { canCreateReport, type Actor } from "@/lib/permissions/policies";
+import { canCreateReport, canViewReport, type Actor } from "@/lib/permissions/policies";
+import type { IncidentType, ReportStatus, Urgency } from "@/generated/prisma/enums";
 import { isPhotoKeyOwnedBy } from "@/lib/storage/keys";
 import { photoExists } from "@/lib/storage/photos";
 import type { ValidCreateReportInput } from "@/lib/validation/report";
@@ -76,4 +77,116 @@ export function findReportPhotoRef(reportId: string) {
     where: { id: reportId },
     select: { reporterId: true, photoKey: true },
   });
+}
+
+export type StudentReportListItem = {
+  id: string;
+  title: string;
+  location: string;
+  incidentType: IncidentType;
+  urgency: Urgency;
+  status: ReportStatus;
+  isAnonymous: boolean;
+  hasPhoto: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/**
+ * Returns all incident reports submitted by the given student, newest first.
+ * The internal storage photoKey is never exposed; hasPhoto indicates photo presence.
+ */
+export async function listReportsForStudent(
+  actor: Actor,
+): Promise<StudentReportListItem[]> {
+  const reports = await prisma.report.findMany({
+    where: { reporterId: actor.id },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      location: true,
+      incidentType: true,
+      urgency: true,
+      status: true,
+      isAnonymous: true,
+      photoKey: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return reports.map(({ photoKey, ...rest }) => ({
+    ...rest,
+    hasPhoto: Boolean(photoKey),
+  }));
+}
+
+export type StudentReportDetail = {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  incidentType: IncidentType;
+  urgency: Urgency;
+  status: ReportStatus;
+  isAnonymous: boolean;
+  hasPhoto: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  statusHistory: Array<{
+    id: string;
+    fromStatus: ReportStatus | null;
+    toStatus: ReportStatus;
+    createdAt: Date;
+    changedBy: { name: string } | null;
+  }>;
+};
+
+/**
+ * Returns a report and its user-visible status history for the student who submitted it.
+ * Internal admin notes are completely excluded from the query so they cannot leak.
+ * Non-owners and non-existent reports return null to protect privacy.
+ */
+export async function getReportForStudent(
+  actor: Actor,
+  reportId: string,
+): Promise<StudentReportDetail | null> {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    select: {
+      id: true,
+      reporterId: true,
+      title: true,
+      description: true,
+      location: true,
+      incidentType: true,
+      urgency: true,
+      status: true,
+      isAnonymous: true,
+      photoKey: true,
+      createdAt: true,
+      updatedAt: true,
+      statusHistory: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          fromStatus: true,
+          toStatus: true,
+          createdAt: true,
+          changedBy: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  if (!report || !canViewReport(actor, report)) {
+    return null;
+  }
+
+  const { reporterId: _reporterId, photoKey, ...rest } = report;
+  return {
+    ...rest,
+    hasPhoto: Boolean(photoKey),
+  };
 }
