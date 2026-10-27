@@ -28,9 +28,11 @@ async function main() {
   try {
     const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) {
-      // Existing passwords are left unchanged.
-      await prisma.user.update({ where: { email }, data: { role: "ADMIN" } });
-      console.log(`Promoted existing account ${email} to ADMIN.`);
+      await prisma.user.update({
+        where: { email },
+        data: { role: "ADMIN", passwordHash: await hashPassword(password) },
+      });
+      console.log(`Promoted existing account ${email} to ADMIN and updated password.`);
     } else {
       await prisma.user.create({
         data: { email, name, passwordHash: await hashPassword(password), role: "ADMIN" },
