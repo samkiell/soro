@@ -185,6 +185,7 @@ export async function getReportForStudent(
   }
 
   const { reporterId: _reporterId, photoKey, ...rest } = report;
+  void _reporterId;
   return {
     ...rest,
     hasPhoto: Boolean(photoKey),

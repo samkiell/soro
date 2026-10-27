@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Clock,
   EyeOff,
-  FileText,
   MapPin,
   PhoneCall,
   ShieldCheck,
@@ -21,10 +20,7 @@ import { INCIDENT_TYPE_LABELS, STATUS_LABELS } from "@/features/reports/labels";
 import { formatDateTime, reportReference } from "@/lib/format";
 import { requireUser } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import {
-  getReportForStudent,
-  type StudentReportDetail,
-} from "@/server/services/report-service";
+import { getReportForStudent } from "@/server/services/report-service";
 import type { ReportStatus } from "@/types";
 
 export const metadata: Metadata = {
