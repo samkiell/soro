@@ -36,10 +36,10 @@ export function FormField({
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>
-        {label}{" "}
-        <span className="font-normal text-text-muted">
-          {required ? "(required)" : "(optional)"}
-        </span>
+        {label}
+        {!required ? (
+          <span className="font-normal text-text-muted"> (optional)</span>
+        ) : null}
       </Label>
       {hint ? (
         <p id={hintId} className="text-sm text-text-secondary">
