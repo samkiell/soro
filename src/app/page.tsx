@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Shield,
   PhoneCall,
@@ -65,105 +66,31 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Visual Column: OAU Senate Building & Landmark Illustration */}
+            {/* Right Visual Column: OAU Senate Building & Landmark Hero Image */}
             <div className="flex justify-center lg:col-span-5">
               <div className="relative w-full max-w-md">
                 {/* Decorative background aura */}
-                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-gold/15 to-brand/10 blur-xl"></div>
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-tr from-gold/20 to-brand/15 blur-xl"></div>
 
-                <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-white/70 p-4 shadow-sm backdrop-blur-xs">
-                  {/* High fidelity SVG of OAU Iconic Senate Building & Statue Landmark */}
-                  <svg
-                    viewBox="0 0 400 340"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-auto w-full drop-shadow-xs"
-                    aria-label="Obafemi Awolowo University Campus Landmark"
-                  >
-                    {/* Sky & Sun backdrop */}
-                    <rect width="400" height="340" rx="12" fill="#FAF6E9" />
-                    <circle cx="200" cy="110" r="85" fill="#F7EAC4" fillOpacity="0.45" />
-
-                    {/* Distant Campus Silhouettes */}
-                    <path
-                      d="M20 250 L60 235 L80 235 L100 250 L140 240 L170 240 L190 250 L250 250 L280 238 L320 238 L350 250 L380 250 L380 280 L20 280 Z"
-                      fill="#EADBB2"
-                      fillOpacity="0.6"
+                <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 bg-white/80 p-3 shadow-md backdrop-blur-xs">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-warm-cream shadow-inner">
+                    <Image
+                      src="/download (7).jpeg"
+                      alt="Obafemi Awolowo University Campus Senate Building"
+                      fill
+                      priority
+                      className="object-cover transition-transform duration-300 hover:scale-[1.02]"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                     />
-
-                    {/* Campus Trees Backdrop */}
-                    <circle cx="90" cy="235" r="18" fill="#D9C99A" />
-                    <circle cx="110" cy="240" r="14" fill="#CBB882" />
-                    <circle cx="295" cy="238" r="16" fill="#D9C99A" />
-                    <circle cx="315" cy="233" r="20" fill="#CBB882" />
-
-                    {/* OAU Tower / Senate Monument Center */}
-                    {/* Left Arch Column */}
-                    <path
-                      d="M150 260 L160 110 L172 105 L178 260 Z"
-                      fill="#D4AF37"
-                    />
-                    <path
-                      d="M160 110 L166 90 L172 90 L172 105 Z"
-                      fill="#B88D1E"
-                    />
-                    {/* Right Arch Column */}
-                    <path
-                      d="M222 260 L228 105 L240 110 L250 260 Z"
-                      fill="#D4AF37"
-                    />
-                    <path
-                      d="M228 105 L228 90 L234 90 L240 110 Z"
-                      fill="#B88D1E"
-                    />
-
-                    {/* Center Monument Arch Bridge & Spire */}
-                    <path
-                      d="M166 90 L200 65 L234 90 L226 102 L200 84 L174 102 Z"
-                      fill="#E2C256"
-                    />
-                    <rect x="197" y="52" width="6" height="16" fill="#B88D1E" rx="1" />
-                    <circle cx="200" cy="50" r="3" fill="#D4AF37" />
-
-                    {/* Inner Arch Glow & Structure */}
-                    <path
-                      d="M174 260 L176 125 Q200 115 224 125 L226 260 Z"
-                      fill="#FAF3DC"
-                    />
-
-                    {/* OAU Crest Medallion in Arch */}
-                    <circle cx="200" cy="165" r="18" fill="#2E1A72" stroke="#D4AF37" strokeWidth="2.5" />
-                    <path
-                      d="M195 158 H205 M200 154 V176 M194 163 C197 172 203 172 206 163"
-                      stroke="#D4AF37"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="200" cy="165" r="7" fill="none" stroke="#D4AF37" strokeWidth="1" strokeDasharray="2 2" />
-
-                    {/* Monument Base Plaza Steps */}
-                    <path d="M130 260 H270 L280 275 H120 Z" fill="#C59F2D" />
-                    <path d="M110 275 H290 L300 288 H100 Z" fill="#B08B20" />
-                    <path d="M70 288 H330 L345 302 H55 Z" fill="#9C7716" />
-
-                    {/* Campus Forecourt & Walkway Lawn */}
-                    <rect x="0" y="302" width="400" height="38" fill="#F4E9C9" />
-                    <path d="M170 302 L150 340 H250 L230 302 Z" fill="#E8D7AA" />
-
-                    {/* Clean Sub-Text Badge on Illustration */}
-                    <rect x="110" y="308" width="180" height="22" rx="11" fill="#FFFFFF" fillOpacity="0.9" />
-                    <text
-                      x="200"
-                      y="323"
-                      textAnchor="middle"
-                      fill="#2E1A72"
-                      fontSize="10"
-                      fontWeight="bold"
-                      fontFamily="Inter, sans-serif"
-                    >
-                      GREAT IFE · OAU CAMPUS
-                    </text>
-                  </svg>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between px-1.5 pb-0.5">
+                    <span className="text-xs font-bold tracking-wider text-brand uppercase">
+                      Great Ife · OAU Campus
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-gold border border-amber-200/70">
+                      Iconic Landmark
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
