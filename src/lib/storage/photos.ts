@@ -31,6 +31,15 @@ function getClient(): S3Client | null {
   return client;
 }
 
+async function getPrismaClient() {
+  try {
+    const { prisma } = await import("@/lib/db/prisma");
+    return prisma;
+  } catch {
+    return null;
+  }
+}
+
 const LOCAL_STORAGE_DIR = path.join(process.cwd(), ".storage", "assets");
 
 function getLocalFilePath(key: string): string {
@@ -48,7 +57,7 @@ const EXT_TO_MIME: Record<string, string> = {
 };
 
 export function isStorageConfigured(): boolean {
-  // Configured if S3 credentials exist OR local storage is enabled as fallback
+  // Always configured: S3 (if credentials provided), Postgres DB (in production/serverless), or local filesystem fallback
   return true;
 }
 
@@ -80,7 +89,31 @@ export async function uploadPhoto(
     return;
   }
 
-  // Local filesystem fallback
+  // Database storage: durable fallback for Vercel/serverless environments without external S3
+  const prisma = await getPrismaClient();
+  if (prisma && process.env.DATABASE_URL) {
+    try {
+      await prisma.photoAsset.upsert({
+        where: { key },
+        create: {
+          key,
+          bytes: Buffer.from(bytes),
+          contentType,
+          size: bytes.byteLength,
+        },
+        update: {
+          bytes: Buffer.from(bytes),
+          contentType,
+          size: bytes.byteLength,
+        },
+      });
+      return;
+    } catch (dbError) {
+      console.warn("[storage] Database photo write failed, falling back to disk if writable:", (dbError as Error).message);
+    }
+  }
+
+  // Local filesystem fallback (offline local dev / unit tests)
   const filePath = getLocalFilePath(key);
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, bytes);
@@ -97,6 +130,19 @@ export async function photoExists(key: string): Promise<boolean> {
     } catch (error) {
       if (isNotFound(error)) return false;
       throw error;
+    }
+  }
+
+  const prisma = await getPrismaClient();
+  if (prisma && process.env.DATABASE_URL) {
+    try {
+      const asset = await prisma.photoAsset.findUnique({
+        where: { key },
+        select: { key: true },
+      });
+      if (asset) return true;
+    } catch {
+      // Fall through to filesystem
     }
   }
 
@@ -132,6 +178,30 @@ export async function getPhoto(key: string): Promise<{
     }
   }
 
+  const prisma = await getPrismaClient();
+  if (prisma && process.env.DATABASE_URL) {
+    try {
+      const asset = await prisma.photoAsset.findUnique({
+        where: { key },
+      });
+      if (asset) {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(asset.bytes);
+            controller.close();
+          },
+        });
+        return {
+          body: stream,
+          contentType: asset.contentType,
+          contentLength: asset.size,
+        };
+      }
+    } catch {
+      // Fall through to filesystem
+    }
+  }
+
   // Local filesystem fallback
   try {
     const filePath = getLocalFilePath(key);
@@ -158,6 +228,15 @@ export async function deletePhoto(key: string): Promise<void> {
       new DeleteObjectCommand({ Bucket: PHOTO_BUCKET, Key: key }),
     );
     return;
+  }
+
+  const prisma = await getPrismaClient();
+  if (prisma && process.env.DATABASE_URL) {
+    try {
+      await prisma.photoAsset.delete({ where: { key } });
+    } catch {
+      // Ignore if not present
+    }
   }
 
   // Local filesystem fallback

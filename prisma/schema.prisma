@@ -112,3 +112,12 @@ model ReportNote {
 
   @@index([reportId, createdAt])
 }
+
+/// Durable storage for uploaded report photos when external S3 bucket is unconfigured.
+model PhotoAsset {
+  key         String   @id
+  bytes       Bytes
+  contentType String
+  size        Int
+  createdAt   DateTime @default(now())
+}

@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     await uploadPhoto(photoKey, bytes, type);
   } catch (error) {
     // Don't leak provider details to the client.
-    console.error("[uploads] storage put failed", (error as Error).name);
+    console.error("[uploads] storage put failed:", (error as Error).message || (error as Error).name);
     return fail("UPLOAD_FAILED", 502);
   }
 
