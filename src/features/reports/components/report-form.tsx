@@ -357,7 +357,7 @@ export function ReportForm() {
         aria-describedby={errors.urgency ? "urgency-error" : undefined}
       >
         <legend className="text-sm font-semibold text-ink">
-          How urgent is it? <span className="font-normal text-text-muted">(required)</span>
+          How urgent is it?
         </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {URGENCY_OPTIONS.map((option) => (
