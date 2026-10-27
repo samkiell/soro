@@ -23,7 +23,10 @@ function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return true;
   try {
-    return new URL(origin).host === new URL(request.url).host;
+    const originHost = new URL(origin).host;
+    const requestHost = new URL(request.url).host;
+    const hostHeader = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    return originHost === requestHost || (!!hostHeader && originHost === hostHeader);
   } catch {
     return false;
   }

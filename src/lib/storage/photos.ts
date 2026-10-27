@@ -10,6 +10,7 @@ import fs from "node:fs/promises";
 import { createReadStream, existsSync } from "node:fs";
 import { Readable } from "node:stream";
 import path from "node:path";
+import { prisma } from "@/lib/db/prisma";
 import { createStorageClient, PHOTO_BUCKET, readStorageConfig } from "./s3";
 import type { PhotoMimeType } from "./image";
 import { PHOTO_KEY_PATTERN } from "./keys";
@@ -29,15 +30,6 @@ function getClient(): S3Client | null {
     client = config ? createStorageClient(config) : null;
   }
   return client;
-}
-
-async function getPrismaClient() {
-  try {
-    const { prisma } = await import("@/lib/db/prisma");
-    return prisma;
-  } catch {
-    return null;
-  }
 }
 
 const LOCAL_STORAGE_DIR = path.join(process.cwd(), ".storage", "assets");
@@ -89,9 +81,8 @@ export async function uploadPhoto(
     return;
   }
 
-  // Database storage: durable fallback for Vercel/serverless environments without external S3
-  const prisma = await getPrismaClient();
-  if (prisma && process.env.DATABASE_URL) {
+  // Database storage: durable store for Vercel/serverless environments without external S3
+  if (process.env.DATABASE_URL) {
     try {
       await prisma.photoAsset.upsert({
         where: { key },
@@ -109,7 +100,10 @@ export async function uploadPhoto(
       });
       return;
     } catch (dbError) {
-      console.warn("[storage] Database photo write failed, falling back to disk if writable:", (dbError as Error).message);
+      console.error("[storage] Database photo write failed:", dbError);
+      if (process.env.VERCEL) {
+        throw dbError;
+      }
     }
   }
 
@@ -133,8 +127,7 @@ export async function photoExists(key: string): Promise<boolean> {
     }
   }
 
-  const prisma = await getPrismaClient();
-  if (prisma && process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL) {
     try {
       const asset = await prisma.photoAsset.findUnique({
         where: { key },
@@ -178,8 +171,7 @@ export async function getPhoto(key: string): Promise<{
     }
   }
 
-  const prisma = await getPrismaClient();
-  if (prisma && process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL) {
     try {
       const asset = await prisma.photoAsset.findUnique({
         where: { key },
@@ -197,8 +189,8 @@ export async function getPhoto(key: string): Promise<{
           contentLength: asset.size,
         };
       }
-    } catch {
-      // Fall through to filesystem
+    } catch (err) {
+      console.error("[storage] Database photo read failed:", err);
     }
   }
 
@@ -230,8 +222,7 @@ export async function deletePhoto(key: string): Promise<void> {
     return;
   }
 
-  const prisma = await getPrismaClient();
-  if (prisma && process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL) {
     try {
       await prisma.photoAsset.delete({ where: { key } });
     } catch {
